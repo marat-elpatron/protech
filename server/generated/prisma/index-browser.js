@@ -126,19 +126,20 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   emailVerified: 'emailVerified',
   image: 'image',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SessionScalarFieldEnum = {
   id: 'id',
-  expiresAt: 'expiresAt',
   token: 'token',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
-  userId: 'userId'
+  userId: 'userId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -149,10 +150,10 @@ exports.Prisma.AccountScalarFieldEnum = {
   accessToken: 'accessToken',
   refreshToken: 'refreshToken',
   idToken: 'idToken',
-  accessTokenExpiresAt: 'accessTokenExpiresAt',
-  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
   scope: 'scope',
   password: 'password',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -164,6 +165,176 @@ exports.Prisma.VerificationScalarFieldEnum = {
   expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CartScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CartItemScalarFieldEnum = {
+  id: 'id',
+  cartId: 'cartId',
+  productId: 'productId',
+  quantity: 'quantity',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ShopQuestionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ShopQuestionImageScalarFieldEnum = {
+  id: 'id',
+  shopQuestionId: 'shopQuestionId',
+  url: 'url'
+};
+
+exports.Prisma.ShopAnswerScalarFieldEnum = {
+  id: 'id',
+  shopQuestionId: 'shopQuestionId',
+  comment: 'comment',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  obtainingMethod: 'obtainingMethod',
+  orderStatus: 'orderStatus',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OrderItemScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  productId: 'productId',
+  price: 'price',
+  quantity: 'quantity'
+};
+
+exports.Prisma.DeliveryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  address: 'address',
+  apartment: 'apartment',
+  entrance: 'entrance',
+  floor: 'floor',
+  intercom: 'intercom',
+  comment: 'comment',
+  deliveryMethod: 'deliveryMethod',
+  deliveredAt: 'deliveredAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentMethod: 'paymentMethod',
+  amount: 'amount',
+  transactionId: 'transactionId',
+  paidAt: 'paidAt'
+};
+
+exports.Prisma.CategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name'
+};
+
+exports.Prisma.ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  currentPrice: 'currentPrice',
+  oldPrice: 'oldPrice',
+  article: 'article',
+  mainImage: 'mainImage',
+  ozonLink: 'ozonLink',
+  categoryId: 'categoryId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProductImageScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  url: 'url'
+};
+
+exports.Prisma.ProductPriceScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  value: 'value',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ProductStockScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  quantity: 'quantity',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AttributeScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  unit: 'unit'
+};
+
+exports.Prisma.ProductAttributeScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  attributeId: 'attributeId',
+  value: 'value'
+};
+
+exports.Prisma.ProductSubscriptionScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.FavoriteProductScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.ReviewScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  rating: 'rating',
+  advantages: 'advantages',
+  disadvantages: 'disadvantages',
+  comment: 'comment',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ReviewPhotoScalarFieldEnum = {
+  id: 'id',
+  reviewId: 'reviewId',
+  url: 'url'
+};
+
+exports.Prisma.ReviewAnswerScalarFieldEnum = {
+  id: 'id',
+  reviewId: 'reviewId',
+  text: 'text',
+  userId: 'userId',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -180,13 +351,60 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.Role = exports.$Enums.Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+};
 
+exports.ObtainingMethod = exports.$Enums.ObtainingMethod = {
+  DELIVERY: 'DELIVERY',
+  PICKUP: 'PICKUP'
+};
+
+exports.OrderStatus = exports.$Enums.OrderStatus = {
+  NEW: 'NEW',
+  CONFIRMED: 'CONFIRMED',
+  PROCESSING: 'PROCESSING',
+  SHIPPED: 'SHIPPED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.DeliveryMethod = exports.$Enums.DeliveryMethod = {
+  OZON: 'OZON'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  OFFLINE: 'OFFLINE',
+  ONLINE: 'ONLINE'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Session: 'Session',
   Account: 'Account',
-  Verification: 'Verification'
+  Verification: 'Verification',
+  Cart: 'Cart',
+  CartItem: 'CartItem',
+  ShopQuestion: 'ShopQuestion',
+  ShopQuestionImage: 'ShopQuestionImage',
+  ShopAnswer: 'ShopAnswer',
+  Order: 'Order',
+  OrderItem: 'OrderItem',
+  Delivery: 'Delivery',
+  Payment: 'Payment',
+  Category: 'Category',
+  Product: 'Product',
+  ProductImage: 'ProductImage',
+  ProductPrice: 'ProductPrice',
+  ProductStock: 'ProductStock',
+  Attribute: 'Attribute',
+  ProductAttribute: 'ProductAttribute',
+  ProductSubscription: 'ProductSubscription',
+  FavoriteProduct: 'FavoriteProduct',
+  Review: 'Review',
+  ReviewPhoto: 'ReviewPhoto',
+  ReviewAnswer: 'ReviewAnswer'
 };
 
 /**
