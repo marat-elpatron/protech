@@ -4,14 +4,14 @@ export const createCartItemSchema = z.object({
 	cartId: z
 		.coerce
 		.number("ID козины необходимо")
-		.int("ID корзины должено быть целым числом")
-		.positive("ID корзины должено быть больше нуля"),
+		.int("ID корзины должно быть целым числом")
+		.positive("ID корзины должно быть больше нуля"),
 
 	productId: z
 		.coerce
 		.number("ID продукта необходимо")
-		.int("ID продукта должено быть целым числом")
-		.positive("ID продукта должено быть больше нуля"),
+		.int("ID продукта должно быть целым числом")
+		.positive("ID продукта должно быть больше нуля"),
 
 	quantity: z
 		.coerce
