@@ -12,7 +12,7 @@ model Product {
     name         String
     description  String
     currentPrice Decimal  @map("current_price") @db.Decimal(12, 2)
-    oldPrice     Decimal  @map("old_price") @db.Decimal(12, 2)
+    oldPrice     Decimal? @map("old_price") @db.Decimal(12, 2)
     article      String   @unique
     mainImage    String   @map("main_image")
     ozonLink     String?  @map("ozon_link")
