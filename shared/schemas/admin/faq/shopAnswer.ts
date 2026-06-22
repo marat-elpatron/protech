@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createShopAnswerSchema = z.object({
+export const shopAnswerSchema = z.strictObject({
 	shopQuestionId: z
 		.coerce
 		.number("ID вопроса необходимо")
@@ -12,6 +12,6 @@ export const createShopAnswerSchema = z.object({
 		.trim()
 		.min(1, "Комментарий необходим")
 		.max(1000, "Комментарий должен быть не более 1000 символов")
-})
+});
 
-export type CreateShopAnswerInput = z.infer<typeof createShopAnswerSchema>
+export type ShopAnswerInput = z.infer<typeof shopAnswerSchema>;

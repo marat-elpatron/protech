@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createReviewAnswerSchema = z.object({
+export const reviewAnswerSchema = z.strictObject({
 	reviewId: z
 		.coerce
 		.number("ID отзыва необходимо")
@@ -14,4 +14,4 @@ export const createReviewAnswerSchema = z.object({
 		.max(1000, "Текст ответа должен быть не более 1000 символов")
 })
 
-export type CreateReviewAnswerInput = z.infer<typeof createReviewAnswerSchema>
+export type ReviewAnswerInput = z.infer<typeof reviewAnswerSchema>

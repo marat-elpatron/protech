@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createAttributeSchema = z.object({
+export const createAttributeSchema = z.strictObject({
 	name: z
 		.string("Название характеристики необходимо")
 		.trim()
@@ -11,7 +11,7 @@ export const createAttributeSchema = z.object({
 		.string()
 		.trim()
 		.max(30, "Единица измерения должна быть не более 30 символов")
-		.optional()
-}).strict();
+		.default("")
+})
 
 export type CreateAttributeInput = z.infer<typeof createAttributeSchema>;

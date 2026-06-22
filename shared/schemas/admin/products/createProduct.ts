@@ -1,17 +1,39 @@
 import z from "zod";
 
-export const createProductSchema = z.object({
+const productImageSchema = z.strictObject({
+	url: z
+		.url("Некорректная ссылка на изображение")
+		.trim()
+		.min(1, "Ссылка на изображение необходима")
+		.max(1000, "Ссылка на изображение должна быть не более 1000 символов")
+});
+
+const productAttributeSchema = z.strictObject({
+	attributeId: z
+		.coerce
+		.number("ID характеристики необходим")
+		.int("ID характеристики должен быть целым числом")
+		.positive("ID характеристики должен быть больше нуля"),
+
+	value: z
+		.string("Значение характеристики необходимо")
+		.trim()
+		.min(1, "Значение характеристики необходимо")
+		.max(255, "Значение характеристики должно быть не более 255 символов")
+});
+
+export const createProductSchema = z.strictObject({
 	name: z
 		.string('Название продукта необходимо')
+		.trim()
 		.max(255, 'Название должно быть не более 255 символов')
-		.min(1, "Название продукта необходимо")
-		.trim(),
+		.min(1, "Название продукта необходимо"),
 
 	description: z
 		.string('Описание продукта необходимо')
+		.trim()
 		.max(1000, 'Описание должно быть не больше 1000 символов')
-		.min(1, "Описание продукта необходимо")
-		.trim(),
+		.min(1, "Описание продукта необходимо"),
 
 	currentPrice: z
 		.coerce
@@ -49,7 +71,15 @@ export const createProductSchema = z.object({
 
 	isActive: z
 		.boolean()
-		.default(true)
-}).strict()
+		.default(true),
+
+	productAttributes: z
+		.array(productAttributeSchema)
+		.optional(),
+
+	productImages: z
+		.array(productImageSchema)
+		.optional()
+})
 
 export type CreateProductInput = z.infer<typeof createProductSchema>

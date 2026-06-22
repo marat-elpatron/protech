@@ -1,12 +1,6 @@
 import z from "zod";
 
-export const createCartItemSchema = z.object({
-	cartId: z
-		.coerce
-		.number("ID козины необходимо")
-		.int("ID корзины должно быть целым числом")
-		.positive("ID корзины должно быть больше нуля"),
-
+export const addCartItemSchema = z.strictObject({
 	productId: z
 		.coerce
 		.number("ID продукта необходимо")
@@ -18,6 +12,6 @@ export const createCartItemSchema = z.object({
 		.number("Количество товара необходимо")
 		.int("Количество товара должно быть целым числом")
 		.positive("Количество товара должно быть больше нуля")
-})
+});
 
-export type CreateCartItemInput = z.infer<typeof createCartItemSchema>
+export type AddCartItemInput = z.infer<typeof addCartItemSchema>;

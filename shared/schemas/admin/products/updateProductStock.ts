@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createProductStockSchema = z.object({
+export const updateProductStockSchema = z.strictObject({
 	productId: z
 		.coerce
 		.number("ID продукта необходим")
@@ -13,6 +13,6 @@ export const createProductStockSchema = z.object({
 		.int("Количество товара должно быть целым числом")
 		.nonnegative("Количество товара не может быть отрицательным")
 		.default(0)
-}).strict();
+})
 
-export type CreateProductStockInput = z.infer<typeof createProductStockSchema>;
+export type UpdateProductStockInput = z.infer<typeof updateProductStockSchema>;

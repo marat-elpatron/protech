@@ -71,9 +71,9 @@ model ProductStock {
 }
 
 model Attribute {
-    id   Int     @id @default(autoincrement())
+    id   Int    @id @default(autoincrement())
     name String
-    unit String?
+    unit String @default("")
 
     productAttributes ProductAttribute[]
 

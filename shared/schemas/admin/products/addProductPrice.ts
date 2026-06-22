@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const createProductPriceSchema = z.object({
+export const addProductPriceSchema = z.strictObject({
 	productId: z
 		.coerce
 		.number("ID продукта необходим")
@@ -11,6 +11,6 @@ export const createProductPriceSchema = z.object({
 		.coerce
 		.number("Цена продукта необходима")
 		.positive("Цена должна быть больше нуля")
-}).strict();
+})
 
-export type CreateProductPriceInput = z.infer<typeof createProductPriceSchema>;
+export type AddProductPriceInput = z.infer<typeof addProductPriceSchema>;

@@ -1,6 +1,14 @@
 import z from "zod";
 
-export const createReviewSchema = z.object({
+const reviewPhotoSchema = z.strictObject({
+	url: z
+		.url("Некорректная ссылка на изображение")
+		.trim()
+		.min(1, "Ссылка на изображение необходима")
+		.max(1000, "Ссылка на изображение должна быть не более 1000 символов")
+});
+
+export const reviewSchema = z.strictObject({
 	productId: z
 		.coerce
 		.number("ID продукта необходим")
@@ -11,7 +19,7 @@ export const createReviewSchema = z.object({
 		.coerce
 		.number("Рейтинг товара необходим")
 		.int("Рейтинг должен быть целым числом")
-		.min(1, "Минимально значение рейтинга - 1")
+		.min(1, "Минимальное значение рейтинга - 1")
 		.max(5, "Максимальное значение рейтинга - 5"),
 
 	advantages: z
@@ -29,8 +37,13 @@ export const createReviewSchema = z.object({
 	comment: z
 		.string()
 		.trim()
-		.max(500, "Максимальное количество символов коммента- 500")
-		.optional()
-})
+		.max(500, "Максимальное количество символов коммента - 500")
+		.optional(),
 
-export type CreateReviewInput = z.infer<typeof createReviewSchema>
+	reviewPhotos: z
+		.array(reviewPhotoSchema)
+		.max(10, "Максимальное количество фото - 10")
+		.optional()
+});
+
+export type reviewInput = z.infer<typeof reviewSchema>;
