@@ -8,7 +8,7 @@ const reviewPhotoSchema = z.strictObject({
 		.max(1000, "Ссылка на изображение должна быть не более 1000 символов")
 });
 
-export const reviewSchema = z.strictObject({
+export const createReviewSchema = z.strictObject({
 	productId: z
 		.coerce
 		.number("ID продукта необходим")
@@ -46,4 +46,4 @@ export const reviewSchema = z.strictObject({
 		.optional()
 });
 
-export type reviewInput = z.infer<typeof reviewSchema>;
+export type CreateReviewInput = z.infer<typeof createReviewSchema>;

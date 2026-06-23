@@ -70,8 +70,7 @@ export const createProductSchema = z.strictObject({
 		.positive("ID категории должен быть больше нуля"),
 
 	isActive: z
-		.boolean()
-		.default(true),
+		.boolean(),
 
 	productAttributes: z
 		.array(productAttributeSchema)

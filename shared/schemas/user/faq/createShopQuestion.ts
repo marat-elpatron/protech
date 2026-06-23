@@ -8,7 +8,7 @@ const shopQuestionImageSchema = z.strictObject({
 		.max(1000, "Ссылка на изображение должна быть не более 1000 символов")
 });
 
-export const shopQuestionSchema = z.strictObject({
+export const createShopQuestionSchema = z.strictObject({
 	title: z
 		.string("Заголовок необходим")
 		.trim()
@@ -27,4 +27,4 @@ export const shopQuestionSchema = z.strictObject({
 		.optional()
 });
 
-export type ShopQuestionInput = z.infer<typeof shopQuestionSchema>;
+export type CreateShopQuestionInput = z.infer<typeof createShopQuestionSchema>;

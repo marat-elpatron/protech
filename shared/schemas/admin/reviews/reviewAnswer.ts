@@ -1,12 +1,6 @@
 import z from "zod";
 
 export const reviewAnswerSchema = z.strictObject({
-	reviewId: z
-		.coerce
-		.number("ID отзыва необходимо")
-		.int("ID отзыва должно быть целым числом")
-		.positive("ID отзыва должно быть больше нуля"),
-
 	text: z
 		.string("Текст ответа необходим")
 		.trim()
