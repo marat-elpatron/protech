@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const userId = session.user.id
-  const data = await readBody<IFavoriteProducts>(event)
+  const user = session.user;
+  const data = await readBody<IFavoriteProducts>(event);
 
   const productIds = Array.isArray(data?.productIds)
     ? [...new Set(data.productIds)]
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   try {
     const result = await prisma.favoriteProduct.deleteMany({
       where: {
-        userId,
+        userId: user.id,
         productId: {
           in: productIds
         }

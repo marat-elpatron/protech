@@ -64,8 +64,37 @@ export default defineEventHandler(async (event) => {
           },
         },
 
-        reviews: true,
-      },
+        reviews: {
+          select: {
+            id: true,
+            rating: true,
+            advantages: true,
+            disadvantages: true,
+            comment: true,
+            createdAt: true,
+            updatedAt: true,
+
+            reviewPhotos: {
+              select: {
+                id: true,
+                url: true
+              }
+            },
+
+            reviewAnswers: {
+              select: {
+                id: true,
+                text: true,
+                user: {
+                  select: {
+                    name: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!product) {
