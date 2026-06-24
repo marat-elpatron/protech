@@ -13,18 +13,12 @@ export default defineEventHandler(async (event) => {
   const user = session.user;
 
   try {
-    await prisma.$transaction(async (tx) => {
-      const cart = await tx.cart.findUnique({
-        where: {
+    const cartItem = await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
           userId: user.id
         }
-      });
-
-      const cartItem = await tx.cartItem.deleteMany({
-        where: {
-          cartId: cart?.id
-        }
-      });
+      }
     });
 
     return { success: true }

@@ -31,28 +31,21 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const cart = await tx.cart.findUnique({
-        where: {
+    const cartItem = await prisma.cartItem.deleteMany({
+      where: {
+        cart: {
           userId: user.id
+        },
+        userId: user.id,
+        productId: {
+          in: productIds
         }
-      });
-
-      const cartItem = await tx.cartItem.deleteMany({
-        where: {
-          userId: user.id,
-          productId: {
-            in: productIds
-          }
-        }
-      });
-
-      return cartItem;
+      }
     });
 
     return {
       success: true,
-      deletedCount: result.count
+      deletedCount: cartItem.count
     }
   } catch (error: any) {
     throw createError({

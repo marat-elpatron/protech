@@ -9,12 +9,6 @@ const reviewPhotoSchema = z.strictObject({
 });
 
 export const createReviewSchema = z.strictObject({
-	productId: z
-		.coerce
-		.number("ID продукта необходим")
-		.int("ID продукта должен быть целым числом")
-		.positive("ID продукта должен быть больше нуля"),
-
 	rating: z
 		.coerce
 		.number("Рейтинг товара необходим")
