@@ -1,6 +1,8 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  devtools: {
+    enabled: true
+  },
   vite: {
     optimizeDeps: {
       include: [
@@ -9,4 +11,4 @@ export default defineNuxtConfig({
       ]
     }
   }
-})
+});

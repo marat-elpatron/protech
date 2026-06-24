@@ -8,10 +8,13 @@ CREATE TYPE "ObtainingMethod" AS ENUM ('DELIVERY', 'PICKUP');
 CREATE TYPE "OrderStatus" AS ENUM ('NEW', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED');
 
 -- CreateEnum
+CREATE TYPE "PaymentMethod" AS ENUM ('OFFLINE', 'ONLINE');
+
+-- CreateEnum
 CREATE TYPE "DeliveryMethod" AS ENUM ('OZON');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('OFFLINE', 'ONLINE');
+CREATE TYPE "PaymentStatus" AS ENUM ('UPON_RECEIPT', 'PAID');
 
 -- CreateTable
 CREATE TABLE "user" (
@@ -131,6 +134,7 @@ CREATE TABLE "order" (
     "user_id" TEXT,
     "obtaining_method" "ObtainingMethod" NOT NULL,
     "order_status" "OrderStatus" NOT NULL DEFAULT 'NEW',
+    "payment_method" "PaymentMethod" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -168,10 +172,10 @@ CREATE TABLE "delivery" (
 CREATE TABLE "payment" (
     "id" SERIAL NOT NULL,
     "order_id" INTEGER NOT NULL,
-    "payment_method" "PaymentMethod" NOT NULL,
+    "payment_status" "PaymentStatus" NOT NULL,
     "amount" DECIMAL(12,2) NOT NULL,
     "transaction_id" TEXT,
-    "paid_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "paid_at" TIMESTAMP(3),
 
     CONSTRAINT "payment_pkey" PRIMARY KEY ("id")
 );
@@ -190,7 +194,7 @@ CREATE TABLE "product" (
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "current_price" DECIMAL(12,2) NOT NULL,
-    "old_price" DECIMAL(12,2) NOT NULL,
+    "old_price" DECIMAL(12,2),
     "article" TEXT NOT NULL,
     "main_image" TEXT NOT NULL,
     "ozon_link" TEXT,
@@ -235,7 +239,7 @@ CREATE TABLE "product_stock" (
 CREATE TABLE "attribute" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "unit" TEXT,
+    "unit" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "attribute_pkey" PRIMARY KEY ("id")
 );
