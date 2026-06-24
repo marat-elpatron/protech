@@ -24,6 +24,7 @@ model User {
     orders               Order[]
     shopAnswers          ShopAnswer[]
     reviewAnswers        ReviewAnswer[]
+    message              Message[]
 
     @@map("user")
 }
