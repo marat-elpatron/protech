@@ -37,6 +37,11 @@ export const createReviewSchema = z.strictObject({
 	reviewPhotos: z
 		.array(reviewPhotoSchema)
 		.max(10, "Максимальное количество фото - 10")
+		.optional(),
+
+	isAnswered: z
+		.coerce
+		.boolean()
 		.optional()
 });
 

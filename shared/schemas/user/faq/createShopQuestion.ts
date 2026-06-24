@@ -24,6 +24,11 @@ export const createShopQuestionSchema = z.strictObject({
 	shopQuestionImages: z
 		.array(shopQuestionImageSchema)
 		.max(10, "Максимальное количество фото - 10")
+		.optional(),
+
+	isAnswered: z
+		.coerce
+		.boolean()
 		.optional()
 });
 
