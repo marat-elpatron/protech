@@ -1,6 +1,5 @@
 import { Prisma } from "@prisma/client";
 import { updateReviewSchema } from "../../../../../../shared/schemas/user/reviews/updateReview"
-import { tr } from "zod/locales";
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -47,6 +46,8 @@ export default defineEventHandler(async (event) => {
     data.comment = body.comment
   }
 
+  data.isAnswered = false;
+
   if (body.reviewPhotos !== undefined) {
     data.reviewPhotos = {
       deleteMany: {},
@@ -80,4 +81,4 @@ export default defineEventHandler(async (event) => {
       message: "Ошибка сервера при обновлении отзыва"
     })
   }
-})
+});

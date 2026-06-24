@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
         advantages: body.advantages,
         disadvantages: body.disadvantages,
         comment: body.comment,
+        isAnswered: false,
 
         ...(body.reviewPhotos?.length
           ? {
