@@ -75,8 +75,10 @@ model Delivery {
 }
 
 enum PaymentStatus {
+    PENDING
     UPON_RECEIPT
     PAID
+    CANCELLED
 }
 
 model Payment {
@@ -85,7 +87,8 @@ model Payment {
     order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
     paymentStatus PaymentStatus @map("payment_status")
     amount        Decimal       @db.Decimal(12, 2)
-    transactionId String?       @map("transaction_id")
+
+    transactionId String? @unique @map("transaction_id")
 
     paidAt DateTime? @map("paid_at")
 

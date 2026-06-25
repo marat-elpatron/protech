@@ -1,4 +1,4 @@
-import { createReviewSchema } from "../../../../../../shared/schemas/user/reviews/createReview"
+import { createReviewSchema } from "~~/shared/schemas/user/reviews/createReview"
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({

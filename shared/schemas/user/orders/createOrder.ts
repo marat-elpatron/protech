@@ -1,18 +1,36 @@
-import z from "zod";
+// server/schemas/createOrder.ts
+import { z } from "zod";
 
 const orderItemSchema = z.strictObject({
-	productId: z
-		.coerce
+	productId: z.coerce
 		.number("ID продукта необходим")
 		.int("ID продукта должен быть целым числом")
 		.positive("ID продукта должен быть больше нуля"),
 
-	quantity: z
-		.coerce
+	quantity: z.coerce
 		.number("Количество товара необходимо")
 		.int("Количество товара должно быть целым числом")
 		.positive("Количество товара должно быть больше нуля")
 });
+
+const orderItemsSchema = z
+	.array(orderItemSchema)
+	.min(1, "Заказ должен содержать хотя бы один товар")
+	.superRefine((items, ctx) => {
+		const seen = new Set<number>();
+
+		for (const [index, item] of items.entries()) {
+			if (seen.has(item.productId)) {
+				ctx.addIssue({
+					code: "custom",
+					path: [index, "productId"],
+					message: "Товар дублируется в заказе"
+				});
+			}
+
+			seen.add(item.productId);
+		}
+	});
 
 const deliveryDetailsSchema = z.strictObject({
 	address: z
@@ -21,74 +39,28 @@ const deliveryDetailsSchema = z.strictObject({
 		.min(1, "Адрес доставки необходим")
 		.max(500, "Адрес доставки должен быть не более 500 символов"),
 
-	apartment: z
-		.string()
-		.trim()
-		.max(50, "Квартира должна быть не более 50 символов")
-		.optional(),
+	apartment: z.string().trim().max(50).optional(),
+	entrance: z.string().trim().max(50).optional(),
+	floor: z.string().trim().max(50).optional(),
+	intercom: z.string().trim().max(50).optional(),
+	comment: z.string().trim().max(1000).optional(),
 
-	entrance: z
-		.string()
-		.trim()
-		.max(50, "Подъезд должен быть не более 50 символов")
-		.optional(),
-
-	floor: z
-		.string()
-		.trim()
-		.max(50, "Этаж должен быть не более 50 символов")
-		.optional(),
-
-	intercom: z
-		.string()
-		.trim()
-		.max(50, "Домофон должен быть не более 50 символов")
-		.optional(),
-
-	comment: z
-		.string()
-		.trim()
-		.max(1000, "Комментарий должен быть не более 1000 символов")
-		.optional(),
-
-	deliveryMethod: z
-		.enum(["OZON"])
-		.default("OZON")
+	deliveryMethod: z.enum(["OZON"]).default("OZON")
 });
 
 export const createOrderSchema = z.discriminatedUnion("obtainingMethod", [
 	z.strictObject({
-		obtainingMethod: z
-			.literal("PICKUP"),
+		obtainingMethod: z.literal("PICKUP"),
+		paymentMethod: z.enum(["OFFLINE", "ONLINE"], "Способ оплаты необходим"),
+		orderItems: orderItemsSchema,
 
-		paymentMethod: z
-			.enum(
-				["OFFLINE", "ONLINE"],
-				"Способ оплаты необходим"
-			),
-
-		orderItems: z
-			.array(orderItemSchema)
-			.min(1, "Заказ должен содержать хотя бы один товар"),
-
-		delivery: z
-			.never("Данные доставки не нужны для самовывоза")
-			.optional()
+		delivery: z.never("Данные доставки не нужны для самовывоза").optional()
 	}),
 
 	z.strictObject({
-		obtainingMethod: z
-			.literal("DELIVERY"),
-
-		paymentMethod: z
-			.enum(
-				["OFFLINE", "ONLINE"],
-				"Способ оплаты необходим"
-			),
-
-		orderItems: z
-			.array(orderItemSchema)
-			.min(1, "Заказ должен содержать хотя бы один товар"),
+		obtainingMethod: z.literal("DELIVERY"),
+		paymentMethod: z.enum(["OFFLINE", "ONLINE"], "Способ оплаты необходим"),
+		orderItems: orderItemsSchema,
 
 		delivery: deliveryDetailsSchema
 	})

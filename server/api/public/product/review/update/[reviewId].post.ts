@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { updateReviewSchema } from "../../../../../../shared/schemas/user/reviews/updateReview"
+import { updateReviewSchema } from "~~/shared/schemas/user/reviews/updateReview"
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
