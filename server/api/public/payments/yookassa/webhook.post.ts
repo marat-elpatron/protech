@@ -1,6 +1,7 @@
 import {
   OrderStatus,
-  PaymentStatus
+  PaymentStatus,
+  Prisma
 } from "@prisma/client";
 import { defineEventHandler } from "h3";
 import { z } from "zod";
@@ -36,12 +37,12 @@ export default defineEventHandler(async (event) => {
   if (!result.success) {
     throw createError({
       statusCode: 400,
-      message: 'Ошибка валидации данных',
+      message: "Ошибка валидации данных",
       data: result.error.flatten((issue) => issue.message).fieldErrors,
-    })
+    });
   }
 
-  const body = result.data
+  const body = result.data;
 
   const payment = await getYooKassaPayment(event, body.object.id);
 
@@ -50,17 +51,16 @@ export default defineEventHandler(async (event) => {
   const existingPayment = await prisma.payment.findFirst({
     where: {
       OR: [
-        {
-          transactionId: payment.id
-        },
+        { transactionId: payment.id },
         ...(Number.isInteger(orderIdFromMetadata)
-          ? [
-            {
-              orderId: orderIdFromMetadata
-            }
-          ]
+          ? [{ orderId: orderIdFromMetadata }]
           : [])
       ]
+    },
+    include: {
+      order: {
+        select: { orderItems: true }
+      }
     }
   });
 
@@ -73,59 +73,67 @@ export default defineEventHandler(async (event) => {
   }
 
   if (payment.status === "succeeded" && payment.paid) {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: {
-          id: existingPayment.id
-        },
+    if (existingPayment.paymentStatus === PaymentStatus.PAID) {
+      return { ok: true, alreadyProcessed: true };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: { id: existingPayment.id },
         data: {
           transactionId: payment.id,
           paymentStatus: PaymentStatus.PAID,
           paidAt: new Date(),
-          amount: payment.amount.value
+          amount: new Prisma.Decimal(payment.amount.value)
         }
-      }),
+      });
 
-      prisma.order.update({
-        where: {
-          id: existingPayment.orderId
-        },
-        data: {
-          orderStatus: OrderStatus.CONFIRMED
-        }
-      })
-    ]);
+      await tx.order.update({
+        where: { id: existingPayment.orderId },
+        data: { orderStatus: OrderStatus.CONFIRMED }
+      });
 
-    return {
-      ok: true
-    };
+      const orderItems = await tx.orderItem.findMany({
+        where: { orderId: existingPayment.orderId },
+        select: { productId: true, quantity: true }
+      });
+
+      for (const item of orderItems) {
+        await tx.productStock.updateMany({
+          where: {
+            productId: item.productId,
+            quantity: { gte: item.quantity }
+          },
+          data: {
+            quantity: { decrement: item.quantity }
+          }
+        });
+      }
+    });
+
+    return { ok: true };
   }
 
   if (payment.status === "canceled") {
+    if (existingPayment.paymentStatus === PaymentStatus.CANCELLED) {
+      return { ok: true, alreadyProcessed: true };
+    }
+
     await prisma.$transaction([
       prisma.payment.update({
-        where: {
-          id: existingPayment.id
-        },
+        where: { id: existingPayment.id },
         data: {
           transactionId: payment.id,
           paymentStatus: PaymentStatus.CANCELLED
         }
       }),
-
       prisma.order.update({
-        where: {
-          id: existingPayment.orderId
-        },
-        data: {
-          orderStatus: OrderStatus.CANCELLED
-        }
+        where: { id: existingPayment.orderId },
+        data: { orderStatus: OrderStatus.CANCELLED }
       })
     ]);
 
-    return {
-      ok: true
-    };
+    return { ok: true };
   }
 
   return {

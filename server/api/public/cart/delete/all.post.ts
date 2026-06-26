@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      message: "Ошибка сервера при удалении всех избранных товаров"
+      message: "Ошибка сервера при удалении всех товаров из корзины"
     })
   }
 });

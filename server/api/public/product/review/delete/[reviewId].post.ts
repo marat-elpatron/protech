@@ -20,11 +20,18 @@ export default defineEventHandler(async (event) => {
       }
     });
 
-    if (review?.userId != user.id) {
+    if (!review) {
       throw createError({
-        statusCode: 402,
-        message: "Это не ваш отзыв!"
-      })
+        statusCode: 404,
+        message: "Отзыв не найден"
+      });
+    }
+
+    if (review.userId !== user.id) {
+      throw createError({
+        statusCode: 403,
+        message: "Это не ваш отзыв"
+      });
     }
 
     await prisma.review.delete({
@@ -35,9 +42,13 @@ export default defineEventHandler(async (event) => {
 
     return { success: true };
   } catch (error: any) {
+    if (error.statusCode) {
+      throw error;
+    }
+
     throw createError({
       statusCode: 500,
       message: "Ошибка сервера при удалении отзыва"
-    })
+    });
   }
 });

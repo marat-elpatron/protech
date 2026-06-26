@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
 
         category: {
           select: {
+            id: true,
             name: true,
           },
         },
@@ -36,8 +37,10 @@ export default defineEventHandler(async (event) => {
           select: {
             id: true,
             value: true,
+            attributeId: true,
             attribute: {
               select: {
+                id: true,
                 name: true,
                 unit: true,
               },

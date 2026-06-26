@@ -1,0 +1,351 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help
+ npmrc` for supported config options.
+строка:1 знак:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> build
+> nuxt build
+
+T  Building Nuxt for production...
+|
+тАв  Nuxt 4.4.8 (with Nitro 2.13.4, Vite 7.3.5 and Vue 3.5.38)
+|
+тАв  Nitro preset: node-server
+i Building client...
+i vite v7.3.5 building client environment for production...
+
+ WARN  [plugin nuxt:module-preload-polyfill] Sourcemap is likely to be incorrect: a plugin (nuxt:module-preload-polyfil
+l) was used to transform files, but didn't generate a sourcemap for the transformation. Consult the plugin documentatio
+n for help
+
+i transforming...
+
+ WARN  [plugin @tailwindcss/vite:generate:build] Sourcemap is likely to be incorrect: a plugin (@tailwindcss/vite:gener
+ate:build) was used to transform files, but didn't generate a sourcemap for the transformation. Consult the plugin docu
+mentation for help
+
+
+ WARN  node_modules/@vueuse/core/dist/index.js (3362:0): A comment
+
+"/* #__PURE__ */"
+
+in "node_modules/@vueuse/core/dist/index.js" contains an annotation that Rollup cannot interpret due to the position of
+ the comment. The comment will be removed to avoid issues.
+
+
+ WARN  node_modules/@vueuse/core/dist/index.js (5780:22): A comment
+
+"/* #__PURE__ */"
+
+in "node_modules/@vueuse/core/dist/index.js" contains an annotation that Rollup cannot interpret due to the position of
+ the comment. The comment will be removed to avoid issues.
+
+i тЬУ 2892 modules transformed.
+i rendering chunks...
+i computing gzip size...
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/manifest.json                  14.36 kB тФВ gzip:  1.83 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/error-500.BW0Y54Of.css    1.91 kB тФВ gzip:  0.73 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/error-404.C3kT2QX-.css    2.43 kB тФВ gzip:  0.86 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/entry.BsXeWAwD.css      103.96 kB тФВ gzip: 17.09 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DlAUqK2U.js               0.09 kB тФВ gzip:  0.10 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D0jS8RLs.js               0.15 kB тФВ gzip:  0.15 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BnjUm2bA.js               0.20 kB тФВ gzip:  0.18 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DuFO33CH.js               0.23 kB тФВ gzip:  0.20 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Dr_dJbH8.js               0.24 kB тФВ gzip:  0.20 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DocS2tEr.js               0.26 kB тФВ gzip:  0.20 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Dep189FB.js               0.29 kB тФВ gzip:  0.23 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/6-pZaezm.js               0.31 kB тФВ gzip:  0.25 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DxgPG-Nc.js               0.34 kB тФВ gzip:  0.27 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CIvirc4b.js               0.36 kB тФВ gzip:  0.27 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DCVcBmnH.js               0.37 kB тФВ gzip:  0.25 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/C8k02UUo.js               0.37 kB тФВ gzip:  0.25 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/YoulSqte.js               0.41 kB тФВ gzip:  0.28 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cy2RdacJ.js               0.42 kB тФВ gzip:  0.28 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/C4DKQXxX.js               0.43 kB тФВ gzip:  0.31 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B8K9y4cA.js               0.47 kB тФВ gzip:  0.26 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Cwmi3U6J.js               0.89 kB тФВ gzip:  0.44 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BCSumP8u.js               0.95 kB тФВ gzip:  0.46 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Doka9z-x.js               0.99 kB тФВ gzip:  0.54 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DBdPGzXM.js               1.13 kB тФВ gzip:  0.71 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B0CJs7zr.js               1.16 kB тФВ gzip:  0.62 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DMzFZTCc.js               1.29 kB тФВ gzip:  0.80 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DuV8D7ca.js               1.59 kB тФВ gzip:  0.78 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/0YzRffmJ.js               1.60 kB тФВ gzip:  0.77 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/auqUs2bB.js               1.82 kB тФВ gzip:  0.59 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/gXCd-ILH.js               2.70 kB тФВ gzip:  1.27 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/aFkO90XO.js               3.48 kB тФВ gzip:  1.56 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DzKpDhuf.js               3.51 kB тФВ gzip:  1.32 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BTagMPNo.js               3.79 kB тФВ gzip:  1.71 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B0wI4Pyw.js               3.80 kB тФВ gzip:  1.34 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D4tOAArH.js               3.97 kB тФВ gzip:  1.86 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DhZ2xzyY.js               4.09 kB тФВ gzip:  1.83 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DgLDDGJS.js               4.35 kB тФВ gzip:  1.73 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/0FLWZSfh.js               4.72 kB тФВ gzip:  2.11 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/BKUpoVq-.js               4.92 kB тФВ gzip:  1.97 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/yeTx0s3u.js               5.18 kB тФВ gzip:  2.06 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/eJqY9SRC.js               5.50 kB тФВ gzip:  2.10 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DDktCdIA.js               5.67 kB тФВ gzip:  2.27 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CbY9Q_Em.js               6.79 kB тФВ gzip:  2.36 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Dr5DspdW.js               7.10 kB тФВ gzip:  2.75 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B1lpqTqG.js               7.43 kB тФВ gzip:  2.36 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CHbALC5Z.js               7.95 kB тФВ gzip:  2.18 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Djv-tcVM.js               8.17 kB тФВ gzip:  2.89 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CV3IFYYL.js               8.36 kB тФВ gzip:  2.95 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/vi8J4pby.js              11.03 kB тФВ gzip:  3.56 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/DiZT1Kez.js              24.61 kB тФВ gzip:  8.01 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Bma0yllw.js              25.44 kB тФВ gzip:  9.46 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/B-VeLkgb.js              29.84 kB тФВ gzip: 11.33 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/Bk9rz_uS.js              31.51 kB тФВ gzip:  9.14 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/CV9l5iyu.js              53.55 kB тФВ gzip: 13.15 kB
+i ../node_modules/.cache/nuxt/.nuxt/dist/client/_nuxt/D13jxxX-.js             265.88 kB тФВ gzip: 97.28 kB
+i тЬУ built in 8.26s
+тИЪ Client built in 8271ms
+i Building server...
+i vite v7.3.5 building ssr environment for production...
+i transforming...
+i тЬУ 427 modules transformed.
+i rendering chunks...
+i тЬУ built in 2.93s
+тИЪ Server built in 2943ms
+[nitro] тИЪ Generated public .output/public
+[nitro] i Building Nuxt Nitro server (preset: node-server, compatibility date: 2025-07-15)
+(node:14444) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./" in the "exports" field
+ module resolution of the package at C:\Users\Marat\protech\node_modules\@prisma\client\package.json imported from C:\U
+sers\Marat\protech\server\api\public\orders\index.post.ts. Mapping specifiers ending in "/" is no longer supported.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:14444) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./" in the "exports" field
+ module resolution of the package at C:\Users\Marat\protech\node_modules\@vue\shared\package.json imported from C:\User
+s\Marat\protech\node_modules\@nuxt\nitro-server\dist\runtime\templates\error-500.mjs. Mapping specifiers ending in "/" 
+is no longer supported.
+(node:14444) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./" in the "exports" field
+ module resolution of the package at C:\Users\Marat\protech\node_modules\@vueuse\core\package.json imported from C:\Use
+rs\Marat\protech\node_modules\.cache\nuxt\.nuxt\dist\server\server.mjs. Mapping specifiers ending in "/" is no longer s
+upported.
+node_modules/@vueuse/core/dist/index.js (3362:0): A comment
+
+"/* #__PURE__ */"
+
+in "node_modules/@vueuse/core/dist/index.js" contains an annotation that Rollup cannot interpret due to the position of
+ the comment. The comment will be removed to avoid issues.
+node_modules/@vueuse/core/dist/index.js (5780:22): A comment
+
+"/* #__PURE__ */"
+
+in "node_modules/@vueuse/core/dist/index.js" contains an annotation that Rollup cannot interpret due to the position of
+ the comment. The comment will be removed to avoid issues.
+(node:14444) [DEP0155] DeprecationWarning: Use of deprecated trailing slash pattern mapping "./" in the "exports" field
+ module resolution of the package at C:\Users\Marat\protech\node_modules\@vueuse\shared\package.json imported from C:\U
+sers\Marat\protech\node_modules\@vueuse\core\dist\index.js. Mapping specifiers ending in "/" is no longer supported.
+[nitro] тИЪ Nuxt Nitro server built
+  тФЬтФА .output/server/chunks/_/auth.mjs (633 B) (344 B gzip)
+  тФЬтФА .output/server/chunks/_/auth.mjs.map (538 B) (273 B gzip)
+  тФЬтФА .output/server/chunks/_/category.mjs (715 B) (258 B gzip)
+  тФЬтФА .output/server/chunks/_/category.mjs.map (314 B) (218 B gzip)
+  тФЬтФА .output/server/chunks/_/createAttribute.mjs (1.2 kB) (343 B gzip)
+  тФЬтФА .output/server/chunks/_/createAttribute.mjs.map (447 B) (259 B gzip)
+  тФЬтФА .output/server/chunks/_/createProduct.mjs (6.47 kB) (892 B gzip)
+  тФЬтФА .output/server/chunks/_/createProduct.mjs.map (1.76 kB) (607 B gzip)
+  тФЬтФА .output/server/chunks/_/createReview.mjs (2.79 kB) (578 B gzip)
+  тФЬтФА .output/server/chunks/_/createReview.mjs.map (991 B) (398 B gzip)
+  тФЬтФА .output/server/chunks/_/createShopQuestion.mjs (2.21 kB) (500 B gzip)
+  тФЬтФА .output/server/chunks/_/createShopQuestion.mjs.map (814 B) (371 B gzip)
+  тФЬтФА .output/server/chunks/_/error-500.mjs (5.09 kB) (2.06 kB gzip)
+  тФЬтФА .output/server/chunks/_/error-500.mjs.map (182 B) (154 B gzip)
+  тФЬтФА .output/server/chunks/_/nitro.mjs (187 kB) (45.3 kB gzip)
+  тФЬтФА .output/server/chunks/_/nitro.mjs.map (3.02 kB) (747 B gzip)
+  тФЬтФА .output/server/chunks/_/prisma.mjs (533 B) (299 B gzip)
+  тФЬтФА .output/server/chunks/_/prisma.mjs.map (487 B) (261 B gzip)
+  тФЬтФА .output/server/chunks/_/requireAdmin.mjs (924 B) (448 B gzip)
+  тФЬтФА .output/server/chunks/_/requireAdmin.mjs.map (792 B) (256 B gzip)
+  тФЬтФА .output/server/chunks/_/yookassa.mjs (2.56 kB) (905 B gzip)
+  тФЬтФА .output/server/chunks/_/yookassa.mjs.map (2.16 kB) (447 B gzip)
+  тФЬтФА .output/server/chunks/build/_id_-1NXWh3Y6.mjs (39.9 kB) (4.51 kB gzip)
+  тФЬтФА .output/server/chunks/build/_id_-1NXWh3Y6.mjs.map (434 B) (207 B gzip)
+  тФЬтФА .output/server/chunks/build/_plugin-vue_export-helper-Ch6jlBgK.mjs (924 B) (482 B gzip)
+  тФЬтФА .output/server/chunks/build/_plugin-vue_export-helper-Ch6jlBgK.mjs.map (225 B) (170 B gzip)
+  тФЬтФА .output/server/chunks/build/admin-DFE0H06E.mjs (95.4 kB) (8.72 kB gzip)
+  тФЬтФА .output/server/chunks/build/admin-DFE0H06E.mjs.map (352 B) (196 B gzip)
+  тФЬтФА .output/server/chunks/build/admin-L9gqsaw0.mjs (1.3 kB) (576 B gzip)
+  тФЬтФА .output/server/chunks/build/admin-L9gqsaw0.mjs.map (185 B) (155 B gzip)
+  тФЬтФА .output/server/chunks/build/AlertDialogTrigger-71d1Vap7.mjs (16.3 kB) (2.43 kB gzip)
+  тФЬтФА .output/server/chunks/build/AlertDialogTrigger-71d1Vap7.mjs.map (211 B) (167 B gzip)
+  тФЬтФА .output/server/chunks/build/app-styles.C3M-CTvf.mjs (15.1 kB) (3.15 kB gzip)
+  тФЬтФА .output/server/chunks/build/app-styles.C3M-CTvf.mjs.map (299 B) (187 B gzip)
+  тФЬтФА .output/server/chunks/build/auth-BD2VTvPY.mjs (1.75 kB) (751 B gzip)
+  тФЬтФА .output/server/chunks/build/auth-BD2VTvPY.mjs.map (183 B) (158 B gzip)
+  тФЬтФА .output/server/chunks/build/CardTitle-CbbZQbAW.mjs (7.09 kB) (1.23 kB gzip)
+  тФЬтФА .output/server/chunks/build/CardTitle-CbbZQbAW.mjs.map (193 B) (163 B gzip)
+  тФЬтФА .output/server/chunks/build/client.precomputed.mjs (30.9 kB) (3.07 kB gzip)
+  тФЬтФА .output/server/chunks/build/client.precomputed.mjs.map (188 B) (150 B gzip)
+  тФЬтФА .output/server/chunks/build/DialogTrigger-BRuvOBnl.mjs (26.1 kB) (3.33 kB gzip)
+  тФЬтФА .output/server/chunks/build/DialogTrigger-BRuvOBnl.mjs.map (214 B) (171 B gzip)
+  тФЬтФА .output/server/chunks/build/error-404-DwW7J3vh.mjs (5.8 kB) (2.33 kB gzip)
+  тФЬтФА .output/server/chunks/build/error-404-DwW7J3vh.mjs.map (193 B) (162 B gzip)
+  тФЬтФА .output/server/chunks/build/error-404-styles.C8lgdT6t.mjs (2.72 kB) (985 B gzip)
+  тФЬтФА .output/server/chunks/build/error-404-styles.C8lgdT6t.mjs.map (317 B) (191 B gzip)
+  тФЬтФА .output/server/chunks/build/error-500-C69eeas5.mjs (4.99 kB) (2.05 kB gzip)
+  тФЬтФА .output/server/chunks/build/error-500-C69eeas5.mjs.map (193 B) (159 B gzip)
+  тФЬтФА .output/server/chunks/build/error-500-styles.Ccrcwcfa.mjs (2.19 kB) (857 B gzip)
+  тФЬтФА .output/server/chunks/build/error-500-styles.Ccrcwcfa.mjs.map (317 B) (189 B gzip)
+  тФЬтФА .output/server/chunks/build/index-8CSKXn66.mjs (59.8 kB) (5.25 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-8CSKXn66.mjs.map (506 B) (217 B gzip)
+  тФЬтФА .output/server/chunks/build/index-8xt20mUW.mjs (9.85 kB) (2.15 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-8xt20mUW.mjs.map (185 B) (156 B gzip)
+  тФЬтФА .output/server/chunks/build/index-B6RaBb5k.mjs (1.39 kB) (628 B gzip)
+  тФЬтФА .output/server/chunks/build/index-B6RaBb5k.mjs.map (185 B) (157 B gzip)
+  тФЬтФА .output/server/chunks/build/index-BDu42RBz.mjs (60.4 kB) (5.39 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-BDu42RBz.mjs.map (394 B) (202 B gzip)
+  тФЬтФА .output/server/chunks/build/index-BJ9JiLtz.mjs (2.92 kB) (1.19 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-BJ9JiLtz.mjs.map (185 B) (156 B gzip)
+  тФЬтФА .output/server/chunks/build/index-CbqwSOZ_.mjs (67.5 kB) (8.16 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-CbqwSOZ_.mjs.map (254 B) (181 B gzip)
+  тФЬтФА .output/server/chunks/build/index-CMFJYeAU.mjs (103 kB) (7.69 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-CMFJYeAU.mjs.map (464 B) (215 B gzip)
+  тФЬтФА .output/server/chunks/build/index-CRNQhdgq.mjs (67 kB) (5.02 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-CRNQhdgq.mjs.map (352 B) (197 B gzip)
+  тФЬтФА .output/server/chunks/build/index-D76B0fcA.mjs (67.6 kB) (5.51 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-D76B0fcA.mjs.map (506 B) (216 B gzip)
+  тФЬтФА .output/server/chunks/build/index-DMgmApi3.mjs (78.1 kB) (6.36 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-DMgmApi3.mjs.map (394 B) (202 B gzip)
+  тФЬтФА .output/server/chunks/build/index-DsFNgNmz.mjs (56.1 kB) (4.59 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-DsFNgNmz.mjs.map (352 B) (197 B gzip)
+  тФЬтФА .output/server/chunks/build/index-izRNOnbJ.mjs (97.9 kB) (7.15 kB gzip)
+  тФЬтФА .output/server/chunks/build/index-izRNOnbJ.mjs.map (492 B) (214 B gzip)
+  тФЬтФА .output/server/chunks/build/Input-C39HQYiH.mjs (6.21 kB) (1.86 kB gzip)
+  тФЬтФА .output/server/chunks/build/Input-C39HQYiH.mjs.map (185 B) (159 B gzip)
+  тФЬтФА .output/server/chunks/build/Label-C-S6OHzh.mjs (1.78 kB) (809 B gzip)
+  тФЬтФА .output/server/chunks/build/Label-C-S6OHzh.mjs.map (185 B) (160 B gzip)
+  тФЬтФА .output/server/chunks/build/login-D5YPjtw_.mjs (23.1 kB) (3.61 kB gzip)
+  тФЬтФА .output/server/chunks/build/login-D5YPjtw_.mjs.map (296 B) (188 B gzip)
+  тФЬтФА .output/server/chunks/build/new-BSMhOHr4.mjs (3.18 kB) (1.31 kB gzip)
+  тФЬтФА .output/server/chunks/build/new-BSMhOHr4.mjs.map (181 B) (157 B gzip)
+  тФЬтФА .output/server/chunks/build/nuxt-link-DvACVDwr.mjs (10.3 kB) (2.76 kB gzip)
+  тФЬтФА .output/server/chunks/build/nuxt-link-DvACVDwr.mjs.map (193 B) (161 B gzip)
+  тФЬтФА .output/server/chunks/build/SelectValue-CvBB3u-2.mjs (25.1 kB) (3.55 kB gzip)
+  тФЬтФА .output/server/chunks/build/SelectValue-CvBB3u-2.mjs.map (197 B) (161 B gzip)
+  тФЬтФА .output/server/chunks/build/server.mjs (83.8 kB) (19.7 kB gzip)
+  тФЬтФА .output/server/chunks/build/server.mjs.map (288 B) (183 B gzip)
+  тФЬтФА .output/server/chunks/build/styles.mjs (473 B) (257 B gzip)
+  тФЬтФА .output/server/chunks/build/styles.mjs.map (164 B) (142 B gzip)
+  тФЬтФА .output/server/chunks/build/TableHeader-BnIov8Zr.mjs (9.99 kB) (1.64 kB gzip)
+  тФЬтФА .output/server/chunks/build/TableHeader-BnIov8Zr.mjs.map (197 B) (162 B gzip)
+  тФЬтФА .output/server/chunks/build/useAdminApi-BbI-FkMy.mjs (21.6 kB) (3.29 kB gzip)
+  тФЬтФА .output/server/chunks/build/useAdminApi-BbI-FkMy.mjs.map (210 B) (172 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/dashboard/stats.get.mjs (1.98 kB) (720 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/dashboard/stats.get.mjs.map (1.77 kB) (395 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/faq/index.post.mjs (2.94 kB) (946 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/faq/index.post.mjs.map (1.66 kB) (513 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index.get.mjs (1.57 kB) (663 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index.get.mjs.map (1.32 kB) (360 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index.post.mjs (2.03 kB) (731 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index.post.mjs.map (1.05 kB) (329 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index2.get.mjs (923 B) (387 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index2.get.mjs.map (551 B) (221 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index2.post.mjs (3.8 kB) (1.16 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index2.post.mjs.map (2.54 kB) (537 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index3.get.mjs (1.59 kB) (668 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index3.get.mjs.map (1.36 kB) (363 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index4.get.mjs (1.94 kB) (789 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index4.get.mjs.map (1.72 kB) (422 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index5.get.mjs (1.63 kB) (680 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/index5.get.mjs.map (1.42 kB) (373 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/orders/_orderId/index.post.mjs (2.4 kB) (908 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/orders/_orderId/index.post.mjs.map (1.53 kB) (474 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/orders/index.post.mjs (2.68 kB) (941 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/orders/index.post.mjs.map (1.52 kB) (487 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/categories/delete/_categoryId_.post.mjs (2.01 kB) (692 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/categories/delete/_categoryId_.post.mjs.map (995 B) (328 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/categories/update/_categoryId_.post.mjs (2.47 kB) (815 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/categories/update/_categoryId_.post.mjs.map (1.36 kB) (376 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/index.get.mjs (1.25 kB) (524 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/index.get.mjs.map (785 B) (279 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/index.post.mjs (2.45 kB) (912 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/_productId/index.post.mjs.map (1.69 kB) (492 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/attributes/delete/_attributeId_.post.mjs (1.57 kB) (583 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/attributes/delete/_attributeId_.post.mjs.map (751 B) (293 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/attributes/update/_attributeId_.post.mjs (2.91 kB) (911 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/attributes/update/_attributeId_.post.mjs.map (1.56 kB) (451 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/delete/_productId_.post.mjs (1.8 kB) (641 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/delete/_productId_.post.mjs.map (868 B) (288 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index.get.mjs (909 B) (392 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index.get.mjs.map (481 B) (231 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index.post.mjs (2.11 kB) (727 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index.post.mjs.map (1.04 kB) (328 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index2.get.mjs (1.06 kB) (424 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/index2.get.mjs.map (636 B) (253 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/stock/update/_productId_.post.mjs (2.61 kB) (880 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/stock/update/_productId_.post.mjs.map (1.54 kB) (476 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/update/_productId_.post.mjs (4.27 kB) (1.26 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/products/update/_productId_.post.mjs.map (3.2 kB) (648 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/reviews/_reviewId/index.post.mjs (2.45 kB) (868 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/admin/reviews/_reviewId/index.post.mjs.map (1.6 kB) (478 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/auth/_...api_.mjs (654 B) (296 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/auth/_...api_.mjs.map (253 B) (161 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/add/_productId_.post.mjs (2.27 kB) (775 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/add/_productId_.post.mjs.map (1.56 kB) (398 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/_productId_.post.mjs (1.78 kB) (674 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/_productId_.post.mjs.map (1.09 kB) (334 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/all.post.mjs (1.5 kB) (586 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/all.post.mjs.map (793 B) (279 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/many.post.mjs (2.06 kB) (768 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/cart/delete/many.post.mjs.map (1.36 kB) (367 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/delete/_shopQuestionId_.post.mjs (1.7 kB) (623 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/delete/_shopQuestionId_.post.mjs.map (1.13 kB) (323 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/index.post.mjs (2.04 kB) (799 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/index.post.mjs.map (1.44 kB) (407 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/update/_shopQuestionId_.post.mjs (3.1 kB) (1.04 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/faq/update/_shopQuestionId_.post.mjs.map (2.31 kB) (555 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index.get.mjs (1.75 kB) (643 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index.get.mjs.map (1.02 kB) (310 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index.post.mjs (10.6 kB) (2.62 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index.post.mjs.map (7.54 kB) (1.56 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index2.get.mjs (1.11 kB) (500 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index2.get.mjs.map (915 B) (301 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index3.get.mjs (5.36 kB) (1.6 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/index3.get.mjs.map (4.93 kB) (899 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/payments/yookassa/webhook.post.mjs (3.99 kB) (1.33 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/payments/yookassa/webhook.post.mjs.map (3.71 kB) (730 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/_productId_.get.mjs (3.08 kB) (820 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/_productId_.get.mjs.map (2.25 kB) (430 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/add/_productId_.post.mjs (1.58 kB) (619 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/add/_productId_.post.mjs.map (863 B) (298 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/_productId_.post.mjs (1.62 kB) (631 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/_productId_.post.mjs.map (892 B) (310 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/all.post.mjs (1.44 kB) (565 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/all.post.mjs.map (730 B) (272 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/many.post.mjs (2.02 kB) (766 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/favorites/delete/many.post.mjs.map (1.33 kB) (367 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index.get.mjs (967 B) (440 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index.get.mjs.map (515 B) (238 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index2.get.mjs (2.82 kB) (929 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index2.get.mjs.map (2.14 kB) (492 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index3.get.mjs (1.84 kB) (668 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/index3.get.mjs.map (1.09 kB) (335 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/add/_productId_.post.mjs (2.51 kB) (908 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/add/_productId_.post.mjs.map (1.67 kB) (442 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/delete/_reviewId_.post.mjs (2.02 kB) (700 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/delete/_reviewId_.post.mjs.map (1.29 kB) (346 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/update/_reviewId_.post.mjs (3.56 kB) (1.13 kB gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/review/update/_reviewId_.post.mjs.map (2.68 kB) (613 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/add/_productId_.post.mjs (1.58 kB) (621 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/add/_productId_.post.mjs.map (867 B) (301 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/_productId_.post.mjs (1.61 kB) (630 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/_productId_.post.mjs.map (896 B) (313 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/all.post.mjs (1.44 kB) (568 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/all.post.mjs.map (734 B) (275 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/many.post.mjs (2.02 kB) (765 B gzip)
+  тФЬтФА .output/server/chunks/routes/api/public/product/subscriptions/delete/many.post.mjs.map (1.33 kB) (369 B gzip)
+  тФЬтФА .output/server/chunks/routes/renderer.mjs (13.8 kB) (4.4 kB gzip)
+  тФЬтФА .output/server/chunks/routes/renderer.mjs.map (845 B) (273 B gzip)
+  тФЬтФА .output/server/chunks/virtual/_virtual_spa-template.mjs (94 B) (100 B gzip)
+  тФЬтФА .output/server/chunks/virtual/_virtual_spa-template.mjs.map (90 B) (98 B gzip)
+  тФЬтФА .output/server/index.mjs (1.67 kB) (737 B gzip)
+  тФФтФА .output/server/package.json (25.9 kB) (7.29 kB gzip)
+╬г Total size: 13.3 MB (3.53 MB gzip)
+[nitro] тИЪ You can preview this build using node .output/server/index.mjs
+|
+тАФ  тЬи Build complete!

@@ -28,6 +28,25 @@ export default defineEventHandler(async (event) => {
   const body = result.data;
   const reviewId = Number(getRouterParam(event, "reviewId"));
 
+  const existingReview = await prisma.review.findUnique({
+    where: { id: reviewId },
+    select: { userId: true }
+  });
+
+  if (!existingReview) {
+    throw createError({
+      statusCode: 404,
+      message: "Отзыв не найден"
+    });
+  }
+
+  if (existingReview.userId !== user.id) {
+    throw createError({
+      statusCode: 403,
+      message: "Это не ваш отзыв"
+    });
+  }
+
   const data: Prisma.ReviewUpdateInput = {}
 
   if (body.rating !== undefined) {

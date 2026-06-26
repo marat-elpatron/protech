@@ -44,6 +44,13 @@ export async function createYooKassaPayment(
 ) {
   const config = useRuntimeConfig(event);
 
+  if (!config.public.appUrl) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Не настроен NUXT_PUBLIC_APP_URL"
+    });
+  }
+
   const response = await fetch("https://api.yookassa.ru/v3/payments", {
     method: "POST",
     headers: {

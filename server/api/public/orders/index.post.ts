@@ -49,7 +49,11 @@ export default defineEventHandler(async (event) => {
       },
       select: {
         id: true,
-        price: true
+        currentPrice: true,
+        isActive: true,
+        productStocks: {
+          select: { quantity: true }
+        }
       }
     });
 
@@ -60,10 +64,31 @@ export default defineEventHandler(async (event) => {
       });
     }
 
+    for (const product of products) {
+      if (!product.isActive) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Товар с ID ${product.id} недоступен для заказа`
+        });
+      }
+    }
+
+    for (const item of body.orderItems) {
+      const product = products.find((p) => p.id === item.productId);
+      const stock = product?.productStocks[0]?.quantity ?? 0;
+
+      if (stock < item.quantity) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Недостаточно товара с ID ${item.productId} на складе`
+        });
+      }
+    }
+
     const priceByProductId = new Map<number, Prisma.Decimal>(
       products.map((product) => [
         product.id,
-        new Prisma.Decimal(product.price)
+        new Prisma.Decimal(product.currentPrice)
       ])
     );
 
@@ -93,7 +118,7 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    return await tx.order.create({
+    const createdOrder = await tx.order.create({
       data: {
         userId: user.id,
         obtainingMethod: body.obtainingMethod,
@@ -140,6 +165,22 @@ export default defineEventHandler(async (event) => {
       },
       include: orderInclude
     });
+
+    if (body.paymentMethod === "OFFLINE") {
+      for (const item of body.orderItems) {
+        await tx.productStock.updateMany({
+          where: {
+            productId: item.productId,
+            quantity: { gte: item.quantity }
+          },
+          data: {
+            quantity: { decrement: item.quantity }
+          }
+        });
+      }
+    }
+
+    return createdOrder;
   });
 
   if (body.paymentMethod === "OFFLINE") {
