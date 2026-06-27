@@ -28,6 +28,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { OrderItem } from "@/composables/useAdminApi";
+import {
+  getObtainingMethodLabel,
+  orderStatusOptions,
+  paymentStatusOptions,
+} from "@/utils/adminStatus";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
@@ -36,9 +41,6 @@ const statusFilter = ref("all");
 const page = ref(1);
 const selectedOrder = ref<OrderItem | null>(null);
 const updating = ref(false);
-
-const orderStatuses = ["NEW", "CONFIRMED", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"];
-const paymentStatuses = ["PENDING", "UPON_RECEIPT", "PAID", "CANCELLED"];
 
 const { data, pending, refresh } = await useAsyncData(
   "orders",
@@ -109,7 +111,9 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Все статусы</SelectItem>
-          <SelectItem v-for="s in orderStatuses" :key="s" :value="s">{{ s }}</SelectItem>
+          <SelectItem v-for="status in orderStatusOptions" :key="status.value" :value="status.value">
+            {{ status.label }}
+          </SelectItem>
         </SelectContent>
       </Select>
 
@@ -140,7 +144,7 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
                 <TableCell>
                   <AdminStatusBadge v-if="order.payment" :status="order.payment.paymentStatus" type="payment" />
                 </TableCell>
-                <TableCell>{{ order.obtainingMethod === "DELIVERY" ? "Доставка" : "Самовывоз" }}</TableCell>
+                <TableCell>{{ getObtainingMethodLabel(order.obtainingMethod) }}</TableCell>
                 <TableCell>
                   <AdminStatusBadge :status="order.orderStatus" type="order" />
                 </TableCell>
@@ -180,8 +184,10 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
             <p><span class="text-muted-foreground">Клиент:</span> {{ selectedOrder.user?.name ||
               selectedOrder.user?.email }}</p>
             <p><span class="text-muted-foreground">Дата:</span> {{ formatDate(selectedOrder.createdAt) }}</p>
-            <p><span class="text-muted-foreground">Способ получения:</span> {{ selectedOrder.obtainingMethod ===
-              "DELIVERY" ? "Доставка" : "Самовывоз" }}</p>
+            <p>
+              <span class="text-muted-foreground">Способ получения:</span>
+              {{ getObtainingMethodLabel(selectedOrder.obtainingMethod) }}
+            </p>
             <p v-if="selectedOrder.delivery"><span class="text-muted-foreground">Адрес:</span> {{
               selectedOrder.delivery.address }}</p>
           </div>
@@ -212,7 +218,9 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="s in orderStatuses" :key="s" :value="s">{{ s }}</SelectItem>
+                  <SelectItem v-for="status in orderStatusOptions" :key="status.value" :value="status.value">
+                    {{ status.label }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -225,7 +233,9 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="s in paymentStatuses" :key="s" :value="s">{{ s }}</SelectItem>
+                  <SelectItem v-for="status in paymentStatusOptions" :key="status.value" :value="status.value">
+                    {{ status.label }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

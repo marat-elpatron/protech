@@ -17,7 +17,8 @@ export function useAdminApi() {
   }
 
   return {
-    getDashboard: () => request<DashboardStats>("/api/admin/dashboard/stats"),
+    getDashboard: (query?: Record<string, string | number | boolean | undefined>) =>
+      request<DashboardStats>("/api/admin/dashboard/stats", { query }),
     getProducts: (query?: Record<string, string | number | boolean | undefined>) =>
       request<Paginated<ProductListItem>>("/api/admin/products", { query }),
     getProduct: (id: number) => request<ProductDetail>(`/api/admin/products/${id}`),
@@ -35,14 +36,20 @@ export function useAdminApi() {
       }),
     getAttributes: () => request<AttributeItem[]>("/api/admin/products/attributes"),
     createAttribute: (body: { name: string; unit?: string }) =>
-      request("/api/admin/products/attributes", { method: "POST", body }),
+      request<{ success: boolean; attribute: Omit<AttributeItem, "_count"> }>(
+        "/api/admin/products/attributes",
+        { method: "POST", body },
+      ),
     updateAttribute: (id: number, body: Record<string, unknown>) =>
       request(`/api/admin/products/attributes/update/${id}`, { method: "POST", body }),
     deleteAttribute: (id: number) =>
       request(`/api/admin/products/attributes/delete/${id}`, { method: "POST" }),
     getCategories: () => request<CategoryItem[]>("/api/admin/categories"),
     createCategory: (name: string) =>
-      request("/api/admin/categories", { method: "POST", body: { name } }),
+      request<{ success: boolean; category: CategoryItem }>("/api/admin/categories", {
+        method: "POST",
+        body: { name },
+      }),
     updateCategory: (categoryId: number, name: string) =>
       request(`/api/admin/categories/update/${categoryId}`, {
         method: "POST",
@@ -112,6 +119,41 @@ export type DashboardStats = {
     revenuePaid: number | string;
   };
   recentOrders: OrderItem[];
+  analytics: {
+    period: {
+      startDate: string;
+      endDate: string;
+      days: number;
+    };
+    selectedProductId: number | null;
+    totals: {
+      quantity: number;
+      orders: number;
+      revenue: number | string;
+      averageOrderValue: number | string;
+    };
+    salesByDay: {
+      date: string;
+      label: string;
+      quantity: number;
+      orders: number;
+      revenue: number | string;
+    }[];
+    productSales: {
+      productId: number;
+      name: string;
+      article: string;
+      mainImage: string;
+      quantity: number;
+      orders: number;
+      revenue: number | string;
+    }[];
+    productOptions: {
+      id: number;
+      name: string;
+      article: string;
+    }[];
+  };
 };
 
 export type ProductListItem = {

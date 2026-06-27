@@ -8,6 +8,7 @@ import {
   ImageIcon,
   ListChecks,
   Sparkles,
+  Loader2,
 } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AdminImageUpload from "@/components/admin/AdminImageUpload.vue";
 import AdminImageGallery from "@/components/admin/AdminImageGallery.vue";
@@ -43,8 +51,37 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const api = useAdminApi();
+const localCategories = ref<CategoryItem[]>([...props.categories]);
+const localAttributeItems = ref([...props.attributeItems]);
+const categoryDialog = ref(false);
+const attributeDialog = ref(false);
+const categorySaving = ref(false);
+const attributeSaving = ref(false);
+const newCategoryName = ref("");
+const newAttribute = reactive({
+  name: "",
+  unit: "",
+});
+
 const form = reactive<ProductFormState>(
   buildProductFormState(props.initial, props.categories),
+);
+
+watch(
+  () => props.categories,
+  (categories) => {
+    localCategories.value = [...categories];
+  },
+  { deep: true },
+);
+
+watch(
+  () => props.attributeItems,
+  (attributes) => {
+    localAttributeItems.value = [...attributes];
+  },
+  { deep: true },
 );
 
 watch(
@@ -57,13 +94,73 @@ watch(
 
 function addAttribute() {
   form.productAttributes.push({
-    attributeId: props.attributeItems[0]?.id ?? 0,
+    attributeId: localAttributeItems.value[0]?.id ?? 0,
     value: "",
   });
 }
 
 function removeAttribute(index: number) {
   form.productAttributes.splice(index, 1);
+}
+
+async function createCategory() {
+  const name = newCategoryName.value.trim();
+
+  if (!name) {
+    toast.error("Укажите название категории");
+    return;
+  }
+
+  categorySaving.value = true;
+  try {
+    const { category } = await api.createCategory(name);
+    localCategories.value = [...localCategories.value, category].sort((a, b) =>
+      a.name.localeCompare(b.name, "ru"),
+    );
+    form.categoryId = category.id;
+    newCategoryName.value = "";
+    categoryDialog.value = false;
+    toast.success("Категория создана");
+  } catch {
+    toast.error("Не удалось создать категорию");
+  } finally {
+    categorySaving.value = false;
+  }
+}
+
+async function createAttribute() {
+  const name = newAttribute.name.trim();
+  const unit = newAttribute.unit.trim();
+
+  if (!name) {
+    toast.error("Укажите название характеристики");
+    return;
+  }
+
+  attributeSaving.value = true;
+  try {
+    const { attribute } = await api.createAttribute({ name, unit });
+    const item = {
+      ...attribute,
+      _count: { productAttributes: 0 },
+    };
+
+    localAttributeItems.value = [...localAttributeItems.value, item].sort((a, b) =>
+      a.name.localeCompare(b.name, "ru"),
+    );
+    form.productAttributes.push({
+      attributeId: item.id,
+      value: "",
+    });
+    newAttribute.name = "";
+    newAttribute.unit = "";
+    attributeDialog.value = false;
+    toast.success("Характеристика создана");
+  } catch {
+    toast.error("Не удалось создать характеристику");
+  } finally {
+    attributeSaving.value = false;
+  }
 }
 
 function handleSubmit() {
@@ -127,19 +224,31 @@ function handleSubmit() {
                 <Input id="article" v-model="form.article" placeholder="IP15P-256" required />
               </div>
               <div class="space-y-2">
-                <Label>Категория *</Label>
+                <div class="flex items-center justify-between gap-2">
+                  <Label>Категория *</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    class="h-7 px-2 text-xs"
+                    @click="categoryDialog = true"
+                  >
+                    <Plus class="size-3.5" />
+                    Новая
+                  </Button>
+                </div>
                 <Select
                   :model-value="form.categoryId ? String(form.categoryId) : undefined"
-                  :disabled="!categories.length"
+                  :disabled="!localCategories.length"
                   @update:model-value="form.categoryId = Number($event)"
                 >
                   <SelectTrigger>
                     <SelectValue
-                      :placeholder="categories.length ? 'Выберите категорию' : 'Сначала создайте категорию'"
+                      :placeholder="localCategories.length ? 'Выберите категорию' : 'Создайте категорию'"
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)">
+                    <SelectItem v-for="cat in localCategories" :key="cat.id" :value="String(cat.id)">
                       {{ cat.name }}
                     </SelectItem>
                   </SelectContent>
@@ -179,11 +288,15 @@ function handleSubmit() {
                 type="button"
                 variant="outline"
                 size="sm"
-                :disabled="!attributeItems.length"
+                :disabled="!localAttributeItems.length"
                 @click="addAttribute"
               >
                 <Plus class="size-4" />
                 Добавить
+              </Button>
+              <Button type="button" variant="secondary" size="sm" @click="attributeDialog = true">
+                <Plus class="size-4" />
+                Новая
               </Button>
             </div>
           </CardHeader>
@@ -202,7 +315,7 @@ function handleSubmit() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
-                    v-for="attribute in attributeItems"
+                    v-for="attribute in localAttributeItems"
                     :key="attribute.id"
                     :value="String(attribute.id)"
                   >
@@ -310,5 +423,64 @@ function handleSubmit() {
         {{ loading ? "Сохранение..." : initial ? "Сохранить изменения" : "Создать товар" }}
       </Button>
     </div>
+
+    <Dialog v-model:open="categoryDialog">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Новая категория</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-2 py-2">
+          <Label for="newCategoryName">Название</Label>
+          <Input
+            id="newCategoryName"
+            v-model="newCategoryName"
+            placeholder="Смартфоны"
+            @keydown.enter.prevent="createCategory"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" type="button" @click="categoryDialog = false">Отмена</Button>
+          <Button type="button" :disabled="categorySaving" @click="createCategory">
+            <Loader2 v-if="categorySaving" class="size-4 animate-spin" />
+            {{ categorySaving ? "Создание..." : "Создать" }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog v-model:open="attributeDialog">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Новая характеристика</DialogTitle>
+        </DialogHeader>
+        <div class="grid gap-4 py-2 sm:grid-cols-2">
+          <div class="space-y-2">
+            <Label for="newAttributeName">Название</Label>
+            <Input
+              id="newAttributeName"
+              v-model="newAttribute.name"
+              placeholder="Объём памяти"
+              @keydown.enter.prevent="createAttribute"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="newAttributeUnit">Единица</Label>
+            <Input
+              id="newAttributeUnit"
+              v-model="newAttribute.unit"
+              placeholder="ГБ, мм, Вт"
+              @keydown.enter.prevent="createAttribute"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" type="button" @click="attributeDialog = false">Отмена</Button>
+          <Button type="button" :disabled="attributeSaving" @click="createAttribute">
+            <Loader2 v-if="attributeSaving" class="size-4 animate-spin" />
+            {{ attributeSaving ? "Создание..." : "Создать" }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </form>
 </template>

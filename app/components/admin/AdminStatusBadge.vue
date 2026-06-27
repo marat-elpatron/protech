@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Badge } from "@/components/ui/badge";
+import { getOrderStatusLabel, getPaymentStatusLabel } from "@/utils/adminStatus";
 
 const props = defineProps<{
   status: string;
@@ -10,24 +11,32 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 type StatusConfig = { label: string; variant: BadgeVariant };
 
 const config = computed<StatusConfig>(() => {
-  const orderMap: Record<string, StatusConfig> = {
-    NEW: { label: "Новый", variant: "secondary" },
-    CONFIRMED: { label: "Подтверждён", variant: "default" },
-    PROCESSING: { label: "В обработке", variant: "default" },
-    SHIPPED: { label: "Отправлен", variant: "default" },
-    COMPLETED: { label: "Завершён", variant: "outline" },
-    CANCELLED: { label: "Отменён", variant: "destructive" },
+  const orderMap: Record<string, BadgeVariant> = {
+    NEW: "secondary",
+    CONFIRMED: "default",
+    PROCESSING: "default",
+    SHIPPED: "default",
+    COMPLETED: "outline",
+    CANCELLED: "destructive",
   };
 
-  const paymentMap: Record<string, StatusConfig> = {
-    PENDING: { label: "Ожидает", variant: "secondary" },
-    UPON_RECEIPT: { label: "При получении", variant: "outline" },
-    PAID: { label: "Оплачен", variant: "default" },
-    CANCELLED: { label: "Отменён", variant: "destructive" },
+  const paymentMap: Record<string, BadgeVariant> = {
+    PENDING: "secondary",
+    UPON_RECEIPT: "outline",
+    PAID: "default",
+    CANCELLED: "destructive",
   };
 
   const map = props.type === "payment" ? paymentMap : orderMap;
-  return map[props.status] ?? { label: props.status, variant: "secondary" };
+  const label =
+    props.type === "payment"
+      ? getPaymentStatusLabel(props.status)
+      : getOrderStatusLabel(props.status);
+
+  return {
+    label,
+    variant: map[props.status] ?? "secondary",
+  };
 });
 </script>
 
