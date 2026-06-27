@@ -13,22 +13,11 @@ export const useAuthStore = defineStore("auth", () => {
     loading.value = true;
 
     try {
-      const { data } = await authClient.getSession();
-
-      if (!data?.user) {
-        user.value = null;
-        return null;
-      }
-
-      try {
-        const adminData = await $fetch<{ user: AuthUser }>("/api/admin/me", {
-          credentials: "include",
-        });
-        user.value = adminData.user;
-      } catch {
-        user.value = data.user as AuthUser;
-      }
-
+      const adminData = await $fetch<{ user: AuthUser }>("/api/admin/me", {
+        credentials: "include",
+        headers: import.meta.server ? useRequestHeaders(["cookie"]) : undefined,
+      });
+      user.value = adminData.user;
       return user.value;
     } catch {
       user.value = null;

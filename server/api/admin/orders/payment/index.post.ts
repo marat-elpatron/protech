@@ -27,13 +27,13 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const paymentStatus = body.paymentMethod as PaymentStatus;
+  const paymentStatus = body.paymentStatus as PaymentStatus;
 
   const updatedPayment = await prisma.payment.update({
     where: { orderId: body.orderId },
     data: {
       paymentStatus,
-      ...(paymentStatus === PaymentStatus.PAID ? { paidAt: new Date() } : {})
+      paidAt: paymentStatus === PaymentStatus.PAID ? new Date() : null,
     }
   });
 

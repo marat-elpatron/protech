@@ -12,7 +12,10 @@ defineProps<{
 </script>
 
 <template>
-  <Card class="relative overflow-hidden transition-shadow hover:shadow-md">
+  <Card class="admin-card group relative overflow-hidden">
+    <div
+      class="pointer-events-none absolute -right-6 -top-6 size-24 rounded-full bg-primary/5 transition-transform duration-300 group-hover:scale-110"
+    />
     <CardHeader class="flex flex-row items-center justify-between pb-2">
       <CardTitle class="text-sm font-medium text-muted-foreground">{{ title }}</CardTitle>
       <div class="rounded-lg bg-primary/10 p-2 text-primary">

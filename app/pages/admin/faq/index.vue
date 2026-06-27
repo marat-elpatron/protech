@@ -71,11 +71,8 @@ async function submitAnswer() {
 
 <template>
   <div>
-    <AdminHeader
-      title="FAQ"
-      description="Вопросы покупателей и ответы магазина"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'FAQ' }]"
-    />
+    <AdminHeader title="FAQ" description="Вопросы покупателей и ответы магазина"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'FAQ' }]" />
 
     <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
       <Tabs v-model="tab" @update:model-value="page = 1">
@@ -103,7 +100,7 @@ async function submitAnswer() {
                 <p class="text-sm">{{ item.comment }}</p>
                 <div v-if="item.shopAnswers.length" class="rounded-lg bg-muted p-3 text-sm">
                   <p class="mb-1 font-medium text-primary">Ответ:</p>
-                  <p>{{ item.shopAnswers[0].comment }}</p>
+                  <p>{{ item.shopAnswers[0]?.comment }}</p>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-xs text-muted-foreground">{{ formatDate(item.createdAt) }}</span>
@@ -139,7 +136,7 @@ async function submitAnswer() {
                 </div>
                 <p class="text-sm">{{ item.comment }}</p>
                 <div v-if="item.shopAnswers.length" class="rounded-lg bg-muted p-3 text-sm">
-                  <p>{{ item.shopAnswers[0].comment }}</p>
+                  <p>{{ item.shopAnswers[0]?.comment }}</p>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-xs text-muted-foreground">{{ formatDate(item.createdAt) }}</span>
@@ -159,7 +156,8 @@ async function submitAnswer() {
 
       <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
         <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">Назад</Button>
-        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages }}</span>
+        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages
+          }}</span>
         <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">Далее</Button>
       </div>
     </div>

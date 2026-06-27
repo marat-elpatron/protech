@@ -12,6 +12,7 @@ node_modules
 # Logs
 logs
 *.log
+dev-server.err
 
 # Misc
 .DS_Store
@@ -24,3 +25,7 @@ logs
 !.env.example
 
 /generated/prisma
+
+# Uploaded media (keep folder)
+/uploads/*
+!/uploads/.gitkeep

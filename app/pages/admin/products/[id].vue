@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { toast } from "vue-sonner";
 import { History, Plus } from "@lucide/vue";
+import AdminProductForm from "@/components/admin/AdminProductForm.vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -25,25 +28,40 @@ definePageMeta({ layout: "admin", middleware: "admin" });
 
 const route = useRoute();
 const api = useAdminApi();
-const productId = Number(route.params.id);
+const productId = computed(() => Number(route.params.id));
 
 const loading = ref(false);
 const priceDialog = ref(false);
 const newPrice = ref(0);
 const priceLoading = ref(false);
 
-const [{ data: product, refresh: refreshProduct }, { data: categories }, { data: attributes }, { data: prices, refresh: refreshPrices }] =
-  await Promise.all([
-    useAsyncData(`product-${productId}`, () => api.getProduct(productId)),
-    useAsyncData("categories", () => api.getCategories()),
-    useAsyncData("attributes", () => api.getAttributes()),
-    useAsyncData(`prices-${productId}`, () => api.getPrices(productId)),
-  ]);
+const {
+  data: product,
+  error: productError,
+  pending: productPending,
+  refresh: refreshProduct,
+} = await useAsyncData(
+  () => `admin-product-${productId.value}`,
+  () => api.getProduct(productId.value),
+  { watch: [productId] },
+);
+
+const { data: categories } = await useAsyncData("admin-categories", () => api.getCategories());
+const { data: attributes } = await useAsyncData("admin-attributes", () => api.getAttributes());
+
+const {
+  data: prices,
+  refresh: refreshPrices,
+} = await useAsyncData(
+  () => `admin-prices-${productId.value}`,
+  () => api.getPrices(productId.value),
+  { watch: [productId] },
+);
 
 async function handleSubmit(data: Record<string, unknown>) {
   loading.value = true;
   try {
-    await api.updateProduct(productId, data);
+    await api.updateProduct(productId.value, data);
     toast.success("Товар обновлён");
     await refreshProduct();
   } catch {
@@ -60,7 +78,7 @@ async function handleAddPrice() {
   }
   priceLoading.value = true;
   try {
-    await api.addPrice(productId, newPrice.value);
+    await api.addPrice(productId.value, newPrice.value);
     toast.success("Цена обновлена");
     priceDialog.value = false;
     newPrice.value = 0;
@@ -92,25 +110,27 @@ function formatDate(date: string) {
 
 <template>
   <div>
-    <AdminHeader
-      :title="product?.name ?? 'Редактирование'"
-      description="Изменение данных товара"
-      :breadcrumbs="[
-        { label: 'Admin', href: '/admin' },
-        { label: 'Товары', href: '/admin/products' },
-        { label: product?.name ?? '...' },
-      ]"
-    />
+    <AdminHeader :title="product?.name ?? 'Редактирование'" description="Изменение данных товара" :breadcrumbs="[
+      { label: 'Admin', href: '/admin' },
+      { label: 'Товары', href: '/admin/products' },
+      { label: product?.name ?? '...' },
+    ]" />
 
     <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <ProductForm
-        v-if="product"
-        :initial="product"
-        :categories="categories ?? []"
-        :attributes="attributes ?? []"
-        :loading="loading"
-        @submit="handleSubmit"
-      />
+      <Alert v-if="productError" variant="destructive">
+        <AlertTitle>Не удалось загрузить товар</AlertTitle>
+        <AlertDescription>
+          Проверьте, что товар существует, и обновите страницу.
+        </AlertDescription>
+      </Alert>
+
+      <div v-if="productPending" class="space-y-4">
+        <Skeleton class="h-64 rounded-xl" />
+        <Skeleton class="h-64 rounded-xl" />
+      </div>
+
+      <AdminProductForm v-else-if="product" :initial="product" :categories="categories ?? []"
+        :attribute-items="attributes ?? []" :loading="loading" @submit="handleSubmit" />
 
       <Card>
         <CardHeader class="flex flex-row items-center justify-between">
@@ -118,7 +138,7 @@ function formatDate(date: string) {
             <History class="size-4" />
             История цен
           </CardTitle>
-          <Button size="sm" @click="priceDialog = true">
+          <Button size="sm" :disabled="!product" @click="priceDialog = true">
             <Plus class="size-4" />
             Новая цена
           </Button>

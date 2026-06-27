@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 <template>
   <SidebarProvider>
     <AdminSidebar />
-    <SidebarInset class="min-h-svh">
+    <SidebarInset class="min-h-svh admin-page-bg">
       <slot />
     </SidebarInset>
   </SidebarProvider>

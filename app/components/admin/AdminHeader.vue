@@ -18,7 +18,9 @@ defineProps<{
 </script>
 
 <template>
-  <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <header
+    class="sticky top-0 z-10 flex h-[4.25rem] shrink-0 items-center gap-2 border-b border-border/60 bg-background/80 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70"
+  >
     <SidebarTrigger class="-ml-1" />
     <Separator orientation="vertical" class="mr-2 h-4" />
 

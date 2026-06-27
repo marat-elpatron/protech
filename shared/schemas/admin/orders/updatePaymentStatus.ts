@@ -6,10 +6,10 @@ export const updatePaymentStatusSchema = z.strictObject({
 		.int("ID заказа должно быть целым числом")
 		.positive("ID заказа должно быть больше нуля"),
 
-	paymentMethod: z
+	paymentStatus: z
 		.enum(
-			["UPON_RECEIPT", "PAID"],
-			"Способ оплаты необходим"
+			["PENDING", "UPON_RECEIPT", "PAID", "CANCELLED"],
+			"Статус оплаты необходим"
 		)
 });
 

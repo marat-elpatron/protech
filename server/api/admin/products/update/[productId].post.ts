@@ -6,6 +6,13 @@ export default defineEventHandler(async (event) => {
 
   const productId = Number(getRouterParam(event, "productId"));
 
+  if (!Number.isInteger(productId) || productId <= 0) {
+    throw createError({
+      statusCode: 400,
+      message: "Некорректный ID товара",
+    });
+  }
+
   const result = await readValidatedBody(event, (body) => updateProductSchema.safeParse(body));
 
   if (!result.success) {
@@ -32,6 +39,16 @@ export default defineEventHandler(async (event) => {
   }
 
   const data: Prisma.ProductUpdateInput = {};
+  const existingProduct =
+    body.currentPrice !== undefined
+      ? await prisma.product.findUnique({
+        where: { id: productId },
+        select: { currentPrice: true },
+      })
+      : null;
+  const priceChanged =
+    existingProduct !== null &&
+    !new Prisma.Decimal(body.currentPrice!).equals(existingProduct.currentPrice);
 
   if (body.name !== undefined) data.name = body.name;
   if (body.description !== undefined) data.description = body.description;
@@ -42,6 +59,10 @@ export default defineEventHandler(async (event) => {
   if (body.ozonLink !== undefined) data.ozonLink = body.ozonLink;
   if (body.categoryId !== undefined) data.category = { connect: { id: body.categoryId } };
   if (body.isActive !== undefined) data.isActive = body.isActive;
+
+  if (priceChanged && body.oldPrice === undefined) {
+    data.oldPrice = existingProduct!.currentPrice;
+  }
 
   if (body.productImages !== undefined) {
     data.productImages = {
@@ -61,7 +82,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const product = await prisma.product.update({
+    const updateProduct = prisma.product.update({
       where: { id: productId },
       data,
       include: {
@@ -73,6 +94,18 @@ export default defineEventHandler(async (event) => {
         productStocks: true
       }
     });
+
+    const product = priceChanged
+      ? (await prisma.$transaction([
+        updateProduct,
+        prisma.productPrice.create({
+          data: {
+            productId,
+            value: body.currentPrice!,
+          },
+        }),
+      ]))[0]
+      : await updateProduct;
 
     return { success: true, product };
   } catch (error: any) {
@@ -87,6 +120,13 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 409,
         message: "Товар с таким артикулом уже существует"
+      });
+    }
+
+    if (error.code === "P2003") {
+      throw createError({
+        statusCode: 400,
+        message: "Указана несуществующая характеристика"
       });
     }
 

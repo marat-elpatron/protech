@@ -65,11 +65,11 @@ async function handleSignOut() {
 </script>
 
 <template>
-  <Sidebar collapsible="icon" class="border-r-0">
-    <SidebarHeader class="border-b border-sidebar-border px-4 py-4">
-      <NuxtLink to="/admin" class="flex items-center gap-3">
+  <Sidebar collapsible="icon" class="border-r-0 bg-sidebar">
+    <SidebarHeader class="border-b border-sidebar-border/80 px-4 py-5">
+      <NuxtLink to="/admin" class="flex items-center gap-3 transition-opacity hover:opacity-90">
         <div
-          class="flex size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+          class="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground shadow-lg shadow-sidebar-primary/25"
         >
           <Zap class="size-5" />
         </div>
@@ -86,11 +86,7 @@ async function handleSignOut() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem v-for="item in navItems" :key="item.href">
-              <SidebarMenuButton
-                as-child
-                :is-active="isActive(item.href)"
-                :tooltip="item.title"
-              >
+              <SidebarMenuButton as-child :is-active="isActive(item.href)" :tooltip="item.title">
                 <NuxtLink :to="item.href">
                   <component :is="item.icon" />
                   <span>{{ item.title }}</span>
@@ -107,10 +103,8 @@ async function handleSignOut() {
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <SidebarMenuButton
-                size="lg"
-                class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              >
+              <SidebarMenuButton size="lg"
+                class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 <Avatar class="size-8 rounded-lg">
                   <AvatarFallback class="rounded-lg bg-sidebar-primary text-sidebar-primary-foreground text-xs">
                     {{ initials }}
@@ -123,12 +117,8 @@ async function handleSignOut() {
                 <ChevronUp class="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-              side="top"
-              align="end"
-              :side-offset="4"
-            >
+            <DropdownMenuContent class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg" side="top"
+              align="end" :side-offset="4">
               <DropdownMenuItem class="text-destructive focus:text-destructive" @click="handleSignOut">
                 <LogOut class="size-4" />
                 Выйти

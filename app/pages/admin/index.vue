@@ -55,25 +55,25 @@ function formatDate(date: string) {
       </div>
 
       <div v-else-if="data" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
+        <AdminStatCard
           title="Товары"
           :value="data.stats.productsActive"
           :description="`${data.stats.productsTotal} всего`"
           :icon="Package"
         />
-        <StatCard
+        <AdminStatCard
           title="Заказы"
           :value="data.stats.ordersTotal"
           :description="`${data.stats.ordersNew} новых`"
           :icon="ShoppingCart"
         />
-        <StatCard
+        <AdminStatCard
           title="Выручка"
           :value="formatPrice(data.stats.revenuePaid)"
           description="Оплаченные заказы"
           :icon="TrendingUp"
         />
-        <StatCard
+        <AdminStatCard
           title="Низкий остаток"
           :value="data.stats.lowStock"
           description="Товаров ≤ 5 шт."
@@ -82,7 +82,7 @@ function formatDate(date: string) {
       </div>
 
       <div v-if="data" class="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card class="admin-card">
           <CardHeader>
             <CardTitle class="flex items-center gap-2 text-base">
               <MessageSquare class="size-4 text-primary" />
@@ -98,7 +98,7 @@ function formatDate(date: string) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card class="admin-card">
           <CardHeader>
             <CardTitle class="flex items-center gap-2 text-base">
               <HelpCircle class="size-4 text-primary" />
@@ -115,7 +115,7 @@ function formatDate(date: string) {
         </Card>
       </div>
 
-      <Card>
+      <Card class="admin-card">
         <CardHeader>
           <CardTitle>Последние заказы</CardTitle>
           <CardDescription>5 последних заказов в системе</CardDescription>
@@ -137,7 +137,7 @@ function formatDate(date: string) {
                 <TableCell>{{ order.user?.name || order.user?.email || "—" }}</TableCell>
                 <TableCell>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</TableCell>
                 <TableCell>
-                  <StatusBadge :status="order.orderStatus" type="order" />
+                  <AdminStatusBadge :status="order.orderStatus" type="order" />
                 </TableCell>
                 <TableCell class="text-muted-foreground">{{ formatDate(order.createdAt) }}</TableCell>
               </TableRow>

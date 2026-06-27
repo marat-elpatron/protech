@@ -62,7 +62,7 @@ async function handleSave() {
   loading.value = true;
   try {
     if (editingItem.value) {
-      await api.updateCategory(0, editingItem.value.id, formName.value);
+      await api.updateCategory(editingItem.value.id, formName.value);
       toast.success("Категория обновлена");
     } else {
       await api.createCategory(formName.value);
@@ -80,7 +80,7 @@ async function handleSave() {
 async function confirmDelete() {
   if (!deleteItem.value) return;
   try {
-    await api.deleteCategory(0, deleteItem.value.id);
+    await api.deleteCategory(deleteItem.value.id);
     toast.success("Категория удалена");
     deleteItem.value = null;
     await refresh();
@@ -92,11 +92,8 @@ async function confirmDelete() {
 
 <template>
   <div>
-    <AdminHeader
-      title="Категории"
-      description="Управление категориями каталога"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Категории' }]"
-    >
+    <AdminHeader title="Категории" description="Управление категориями каталога"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Категории' }]">
       <template #actions>
         <Button @click="openCreate">
           <Plus class="size-4" />
@@ -167,7 +164,8 @@ async function confirmDelete() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="confirmDelete">
+          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            @click="confirmDelete">
             Удалить
           </AlertDialogAction>
         </AlertDialogFooter>

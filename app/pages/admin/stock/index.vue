@@ -49,11 +49,8 @@ async function saveStock(productId: number) {
 
 <template>
   <div>
-    <AdminHeader
-      title="Склад"
-      description="Управление остатками товаров"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Склад' }]"
-    />
+    <AdminHeader title="Склад" description="Управление остатками товаров"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Склад' }]" />
 
     <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
       <Card>
@@ -83,39 +80,23 @@ async function saveStock(productId: number) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Input
-                    v-if="editing[item.product.id] !== undefined"
-                    v-model.number="editing[item.product.id]"
-                    type="number"
-                    min="0"
-                    class="w-24"
-                  />
-                  <span
-                    v-else
-                    :class="item.quantity <= 5 ? 'font-semibold text-destructive' : 'font-medium'"
-                  >
+                  <Input v-if="editing[item.product.id] !== undefined" v-model.number="editing[item.product.id]"
+                    type="number" min="0" class="w-24" />
+                  <span v-else :class="item.quantity <= 5 ? 'font-semibold text-destructive' : 'font-medium'">
                     {{ item.quantity }} шт.
                   </span>
                 </TableCell>
                 <TableCell class="text-sm text-muted-foreground">
-                  {{ new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" }).format(new Date(item.updatedAt)) }}
+                  {{ new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short" }).format(new
+                    Date(item.updatedAt)) }}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    v-if="editing[item.product.id] !== undefined"
-                    size="sm"
-                    :disabled="saving === item.product.id"
-                    @click="saveStock(item.product.id)"
-                  >
+                  <Button v-if="editing[item.product.id] !== undefined" size="sm" :disabled="saving === item.product.id"
+                    @click="saveStock(item.product.id)">
                     <Save class="size-4" />
                     {{ saving === item.product.id ? "..." : "Сохранить" }}
                   </Button>
-                  <Button
-                    v-else
-                    variant="outline"
-                    size="sm"
-                    @click="startEdit(item.product.id, item.quantity)"
-                  >
+                  <Button v-else variant="outline" size="sm" @click="startEdit(item.product.id, item.quantity)">
                     Изменить
                   </Button>
                 </TableCell>

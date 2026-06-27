@@ -95,11 +95,8 @@ async function confirmDelete() {
 
 <template>
   <div>
-    <AdminHeader
-      title="Характеристики"
-      description="Справочник атрибутов товаров"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Характеристики' }]"
-    >
+    <AdminHeader title="Характеристики" description="Справочник атрибутов товаров"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Характеристики' }]">
       <template #actions>
         <Button @click="openCreate">
           <Plus class="size-4" />
@@ -178,7 +175,8 @@ async function confirmDelete() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="confirmDelete">
+          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            @click="confirmDelete">
             Удалить
           </AlertDialogAction>
         </AlertDialogFooter>

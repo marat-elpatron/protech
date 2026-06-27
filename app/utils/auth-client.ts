@@ -1,8 +1,6 @@
 import { createAuthClient } from "better-auth/vue";
 
-export const authClient = createAuthClient({
-  baseURL: import.meta.client ? window.location.origin : "http://localhost:3000",
-});
+export const authClient = createAuthClient();
 
 export type AuthUser = {
   id: string;

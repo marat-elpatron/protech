@@ -6,19 +6,21 @@ type FetchOptions = {
 
 export function useAdminApi() {
   async function request<T>(url: string, options: FetchOptions = {}): Promise<T> {
-    return await $fetch<T>(url, {
+    const response = await $fetch(url, {
       method: options.method ?? "GET",
       body: options.body,
       query: options.query,
       credentials: "include",
     });
+
+    return response as T;
   }
 
   return {
     getDashboard: () => request<DashboardStats>("/api/admin/dashboard/stats"),
     getProducts: (query?: Record<string, string | number | boolean | undefined>) =>
       request<Paginated<ProductListItem>>("/api/admin/products", { query }),
-    getProduct: (id: number) => request<ProductDetail>(`/api/public/product/${id}`),
+    getProduct: (id: number) => request<ProductDetail>(`/api/admin/products/${id}`),
     createProduct: (body: Record<string, unknown>) =>
       request("/api/admin/products", { method: "POST", body }),
     updateProduct: (id: number, body: Record<string, unknown>) =>
@@ -38,18 +40,16 @@ export function useAdminApi() {
       request(`/api/admin/products/attributes/update/${id}`, { method: "POST", body }),
     deleteAttribute: (id: number) =>
       request(`/api/admin/products/attributes/delete/${id}`, { method: "POST" }),
-    getCategories: () => request<CategoryItem[]>("/api/public/product/categories"),
+    getCategories: () => request<CategoryItem[]>("/api/admin/categories"),
     createCategory: (name: string) =>
       request("/api/admin/categories", { method: "POST", body: { name } }),
-    updateCategory: (productId: number, categoryId: number, name: string) =>
-      request(`/api/admin/products/${productId}/categories/update/${categoryId}`, {
+    updateCategory: (categoryId: number, name: string) =>
+      request(`/api/admin/categories/update/${categoryId}`, {
         method: "POST",
         body: { name },
       }),
-    deleteCategory: (productId: number, categoryId: number) =>
-      request(`/api/admin/products/${productId}/categories/delete/${categoryId}`, {
-        method: "POST",
-      }),
+    deleteCategory: (categoryId: number) =>
+      request(`/api/admin/categories/delete/${categoryId}`, { method: "POST" }),
     getPrices: (productId: number) =>
       request<PriceItem[]>(`/api/admin/products/${productId}/price`),
     addPrice: (productId: number, value: number) =>
@@ -64,10 +64,10 @@ export function useAdminApi() {
         method: "POST",
         body: { orderStatus },
       }),
-    updatePaymentStatus: (orderId: number, paymentMethod: string) =>
+    updatePaymentStatus: (orderId: number, paymentStatus: string) =>
       request("/api/admin/orders/payment", {
         method: "POST",
-        body: { orderId, paymentMethod },
+        body: { orderId, paymentStatus },
       }),
     getReviews: (query?: Record<string, string | number | boolean | undefined>) =>
       request<Paginated<ReviewItem>>("/api/admin/reviews", { query }),
@@ -83,6 +83,15 @@ export function useAdminApi() {
         method: "POST",
         body: { shopQuestionId, comment },
       }),
+    uploadImage: (file: File) => {
+      const body = new FormData();
+      body.append("file", file);
+      return $fetch<{ url: string }>("/api/admin/upload", {
+        method: "POST",
+        body,
+        credentials: "include",
+      });
+    },
   };
 }
 
@@ -125,7 +134,8 @@ export type ProductDetail = ProductListItem & {
   productAttributes: {
     id: number;
     value: string;
-    attribute: { name: string; unit: string };
+    attributeId: number;
+    attribute: { id: number; name: string; unit: string };
   }[];
   productPrices: { id: number; value: number | string; createdAt: string }[];
 };

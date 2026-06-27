@@ -1,11 +1,8 @@
 import z from "zod";
+import { imagePathSchema } from "../../imagePath";
 
 const productImageSchema = z.strictObject({
-	url: z
-		.url("Некорректная ссылка на изображение")
-		.trim()
-		.min(1, "Ссылка на изображение необходима")
-		.max(1000, "Ссылка на изображение должна быть не более 1000 символов")
+	url: imagePathSchema,
 });
 
 const productAttributeSchema = z.strictObject({
@@ -52,10 +49,7 @@ export const createProductSchema = z.strictObject({
 		.min(1, "Артикул продукта необходим")
 		.max(50, "Артикул должен быть не более 50 символов"),
 
-	mainImage: z
-		.string("Обязательно должно быть главное изображение")
-		.trim()
-		.min(1, "Обязательно должно быть главное изображение"),
+	mainImage: imagePathSchema,
 
 	ozonLink: z
 		.url("Ссылка должна иметь корректный формат адреса")
@@ -74,6 +68,10 @@ export const createProductSchema = z.strictObject({
 
 	productAttributes: z
 		.array(productAttributeSchema)
+		.refine(
+			(attributes) => new Set(attributes.map((attribute) => attribute.attributeId)).size === attributes.length,
+			"Характеристики товара не должны повторяться"
+		)
 		.optional(),
 
 	productImages: z

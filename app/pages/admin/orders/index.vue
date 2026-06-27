@@ -99,11 +99,8 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
 
 <template>
   <div>
-    <AdminHeader
-      title="Заказы"
-      description="Управление заказами и оплатой"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Заказы' }]"
-    />
+    <AdminHeader title="Заказы" description="Управление заказами и оплатой"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Заказы' }]" />
 
     <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
       <Select v-model="statusFilter">
@@ -141,11 +138,11 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
                 <TableCell>{{ order.user?.name || order.user?.email || "Гость" }}</TableCell>
                 <TableCell>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</TableCell>
                 <TableCell>
-                  <StatusBadge v-if="order.payment" :status="order.payment.paymentStatus" type="payment" />
+                  <AdminStatusBadge v-if="order.payment" :status="order.payment.paymentStatus" type="payment" />
                 </TableCell>
                 <TableCell>{{ order.obtainingMethod === "DELIVERY" ? "Доставка" : "Самовывоз" }}</TableCell>
                 <TableCell>
-                  <StatusBadge :status="order.orderStatus" type="order" />
+                  <AdminStatusBadge :status="order.orderStatus" type="order" />
                 </TableCell>
                 <TableCell class="text-sm text-muted-foreground">{{ formatDate(order.createdAt) }}</TableCell>
                 <TableCell>
@@ -166,7 +163,8 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
 
       <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
         <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">Назад</Button>
-        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages }}</span>
+        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages
+          }}</span>
         <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">Далее</Button>
       </div>
     </div>
@@ -179,10 +177,13 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
 
         <div v-if="selectedOrder" class="mt-6 space-y-6">
           <div class="space-y-2 text-sm">
-            <p><span class="text-muted-foreground">Клиент:</span> {{ selectedOrder.user?.name || selectedOrder.user?.email }}</p>
+            <p><span class="text-muted-foreground">Клиент:</span> {{ selectedOrder.user?.name ||
+              selectedOrder.user?.email }}</p>
             <p><span class="text-muted-foreground">Дата:</span> {{ formatDate(selectedOrder.createdAt) }}</p>
-            <p><span class="text-muted-foreground">Способ получения:</span> {{ selectedOrder.obtainingMethod === "DELIVERY" ? "Доставка" : "Самовывоз" }}</p>
-            <p v-if="selectedOrder.delivery"><span class="text-muted-foreground">Адрес:</span> {{ selectedOrder.delivery.address }}</p>
+            <p><span class="text-muted-foreground">Способ получения:</span> {{ selectedOrder.obtainingMethod ===
+              "DELIVERY" ? "Доставка" : "Самовывоз" }}</p>
+            <p v-if="selectedOrder.delivery"><span class="text-muted-foreground">Адрес:</span> {{
+              selectedOrder.delivery.address }}</p>
           </div>
 
           <Separator />
@@ -205,11 +206,8 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
           <div class="space-y-3">
             <div class="space-y-2">
               <Label>Статус заказа</Label>
-              <Select
-                :model-value="selectedOrder.orderStatus"
-                :disabled="updating"
-                @update:model-value="updateOrderStatus(selectedOrder!.id, $event as string)"
-              >
+              <Select :model-value="selectedOrder.orderStatus" :disabled="updating"
+                @update:model-value="updateOrderStatus(selectedOrder!.id, $event as string)">
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -221,11 +219,8 @@ async function updatePaymentStatus(orderId: number, paymentMethod: string) {
 
             <div v-if="selectedOrder.payment" class="space-y-2">
               <Label>Статус оплаты</Label>
-              <Select
-                :model-value="selectedOrder.payment.paymentStatus"
-                :disabled="updating"
-                @update:model-value="updatePaymentStatus(selectedOrder!.id, $event as string)"
-              >
+              <Select :model-value="selectedOrder.payment.paymentStatus" :disabled="updating"
+                @update:model-value="updatePaymentStatus(selectedOrder!.id, $event as string)">
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

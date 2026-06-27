@@ -70,11 +70,8 @@ async function submitAnswer() {
 
 <template>
   <div>
-    <AdminHeader
-      title="Отзывы"
-      description="Модерация и ответы на отзывы покупателей"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Отзывы' }]"
-    />
+    <AdminHeader title="Отзывы" description="Модерация и ответы на отзывы покупателей"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Отзывы' }]" />
 
     <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
       <Tabs v-model="tab" @update:model-value="page = 1">
@@ -111,7 +108,7 @@ async function submitAnswer() {
                     <p v-if="review.disadvantages" class="text-xs text-destructive">− {{ review.disadvantages }}</p>
                     <div v-if="review.reviewAnswers.length" class="rounded-lg bg-muted p-3 text-sm">
                       <p class="mb-1 font-medium text-primary">Ответ магазина:</p>
-                      <p>{{ review.reviewAnswers[0].text }}</p>
+                      <p>{{ review.reviewAnswers[0]?.text }}</p>
                     </div>
                     <div class="flex items-center justify-between pt-1">
                       <span class="text-xs text-muted-foreground">{{ formatDate(review.createdAt) }}</span>
@@ -152,7 +149,7 @@ async function submitAnswer() {
                     </div>
                     <p v-if="review.comment" class="text-sm">{{ review.comment }}</p>
                     <div v-if="review.reviewAnswers.length" class="rounded-lg bg-muted p-3 text-sm">
-                      <p>{{ review.reviewAnswers[0].text }}</p>
+                      <p>{{ review.reviewAnswers[0]?.text }}</p>
                     </div>
                     <div class="flex items-center justify-between pt-1">
                       <span class="text-xs text-muted-foreground">{{ formatDate(review.createdAt) }}</span>
@@ -174,7 +171,8 @@ async function submitAnswer() {
 
       <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
         <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">Назад</Button>
-        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages }}</span>
+        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages
+        }}</span>
         <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">Далее</Button>
       </div>
     </div>

@@ -7,6 +7,12 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/tailwind.css'],
   modules: ['@pinia/nuxt', 'shadcn-nuxt'],
+  components: [
+    {
+      path: '~/components/admin',
+      pathPrefix: false,
+    },
+  ],
   shadcn: {
     prefix: '',
     componentDir: './app/components/ui'
@@ -17,6 +23,15 @@ export default defineNuxtConfig({
     public: {
       appUrl: process.env.NUXT_PUBLIC_APP_URL || 'http://localhost:3000'
     }
+  },
+  nitro: {
+    publicAssets: [
+      {
+        baseURL: '/uploads',
+        dir: 'uploads',
+        maxAge: 60 * 60 * 24 * 7,
+      },
+    ],
   },
   vite: {
     plugins: [tailwindcss()],

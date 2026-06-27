@@ -89,11 +89,8 @@ async function confirmDelete() {
 
 <template>
   <div>
-    <AdminHeader
-      title="Товары"
-      description="Управление каталогом продукции"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Товары' }]"
-    >
+    <AdminHeader title="Товары" description="Управление каталогом продукции"
+      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Товары' }]">
       <template #actions>
         <Button as-child>
           <NuxtLink to="/admin/products/new">
@@ -108,11 +105,8 @@ async function confirmDelete() {
       <div class="flex flex-col gap-3 sm:flex-row">
         <div class="relative flex-1">
           <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            class="pl-9"
-            placeholder="Поиск по названию или артикулу..."
-            @input="onSearchInput(($event.target as HTMLInputElement).value)"
-          />
+          <Input class="pl-9" placeholder="Поиск по названию или артикулу..."
+            @input="onSearchInput(($event.target as HTMLInputElement).value)" />
         </div>
         <Select v-model="statusFilter">
           <SelectTrigger class="w-full sm:w-44">
@@ -126,7 +120,7 @@ async function confirmDelete() {
         </Select>
       </div>
 
-      <Card>
+      <Card class="admin-card">
         <CardContent class="p-0">
           <div v-if="pending" class="space-y-3 p-4">
             <Skeleton v-for="i in 5" :key="i" class="h-12 w-full" />
@@ -148,11 +142,9 @@ async function confirmDelete() {
             <TableBody>
               <TableRow v-for="product in data.items" :key="product.id">
                 <TableCell>
-                  <img
-                    :src="product.mainImage"
-                    :alt="product.name"
-                    class="size-10 rounded-md object-cover"
-                  />
+                  <div class="size-11 overflow-hidden rounded-lg ring-1 ring-border/60">
+                    <img :src="product.mainImage" :alt="product.name" class="size-full object-cover" />
+                  </div>
                 </TableCell>
                 <TableCell class="font-medium">{{ product.name }}</TableCell>
                 <TableCell class="text-muted-foreground">{{ product.article }}</TableCell>
@@ -195,23 +187,13 @@ async function confirmDelete() {
       </Card>
 
       <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page <= 1"
-          @click="page--"
-        >
+        <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">
           Назад
         </Button>
         <span class="flex items-center px-3 text-sm text-muted-foreground">
           {{ page }} / {{ data.pagination.pages }}
         </span>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="page >= data.pagination.pages"
-          @click="page++"
-        >
+        <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">
           Далее
         </Button>
       </div>
@@ -227,7 +209,8 @@ async function confirmDelete() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="confirmDelete">
+          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            @click="confirmDelete">
             {{ deleting ? "Удаление..." : "Удалить" }}
           </AlertDialogAction>
         </AlertDialogFooter>
