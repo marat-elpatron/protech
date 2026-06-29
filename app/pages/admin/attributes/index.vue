@@ -74,29 +74,30 @@ async function deleteAttribute(attribute: AttributeItem) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Catalog" title="Атрибуты" description="Справочник характеристик для карточек товаров" />
 
-    <div>
-      <section>
-        <div>
+    <div class="admin-stack">
+      <section class="admin-card">
+        <div class="admin-card-header">
           <div>
-            <h2>Новый атрибут</h2>
-            <p>Например: объем памяти, диагональ, мощность</p>
+            <h2 class="admin-card-heading">Новый атрибут</h2>
+            <p class="admin-card-copy">Например: объем памяти, диагональ, мощность</p>
           </div>
           <Tags />
         </div>
-        <form @submit.prevent="createAttribute">
-          <div>
+        <form class="grid gap-4 lg:grid-cols-[minmax(180px,1fr)_minmax(160px,0.7fr)_auto] lg:items-end"
+          @submit.prevent="createAttribute">
+          <div class="admin-field">
             <label for="attribute-name">Название</label>
             <input id="attribute-name" v-model="form.name" placeholder="Мощность" />
           </div>
-          <div>
+          <div class="admin-field">
             <label for="attribute-unit">Единица измерения</label>
             <input id="attribute-unit" v-model="form.unit" placeholder="Вт" />
           </div>
           <div>
-            <button type="submit" :disabled="saving">
+            <button class="admin-button-primary w-full lg:w-auto" type="submit" :disabled="saving">
               <Plus />
               {{ saving ? "Создание..." : "Создать" }}
             </button>
@@ -104,65 +105,75 @@ async function deleteAttribute(attribute: AttributeItem) {
         </form>
       </section>
 
-      <section>
-        <div>
+      <section class="admin-card">
+        <div class="admin-card-header">
           <div>
-            <h2>Все атрибуты</h2>
-            <p>{{ attributes.length }} записей</p>
+            <h2 class="admin-card-heading">Все атрибуты</h2>
+            <p class="admin-card-copy">{{ attributes.length }} записей</p>
           </div>
         </div>
         <div>
-          <div v-if="pending">Загружаю атрибуты...</div>
+          <div v-if="pending" class="admin-loading">Загружаю атрибуты...</div>
           <div v-else-if="attributes.length">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Название</th>
-                  <th>Единица</th>
-                  <th>В товарах</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="attribute in attributes" :key="attribute.id">
-                  <td>{{ attribute.id }}</td>
-                  <td>
-                    <input v-if="editingId === attribute.id" v-model="editing.name"
-                      @keydown.enter.prevent="saveEdit(attribute.id)" />
-                    <strong v-else>{{ attribute.name }}</strong>
-                  </td>
-                  <td>
-                    <input v-if="editingId === attribute.id" v-model="editing.unit"
-                      @keydown.enter.prevent="saveEdit(attribute.id)" />
-                    <span v-else>{{ attribute.unit || "—" }}</span>
-                  </td>
-                  <td>{{ attribute._count.productAttributes }}</td>
-                  <td>
-                    <div>
-                      <template v-if="editingId === attribute.id">
-                        <button type="button" title="Сохранить" @click="saveEdit(attribute.id)">
-                          <Check />
-                        </button>
-                        <button type="button" title="Отмена" @click="editingId = null">
-                          <X />
-                        </button>
-                      </template>
-                      <template v-else>
-                        <button type="button" title="Редактировать" @click="startEdit(attribute)">
-                          <Pencil />
-                        </button>
-                        <button type="button" title="Удалить" @click="deleteAttribute(attribute)">
-                          <Trash2 />
-                        </button>
-                      </template>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="admin-data-list">
+              <div
+                class="admin-data-header lg:grid-cols-[90px_minmax(200px,1fr)_minmax(130px,0.7fr)_minmax(100px,0.6fr)_minmax(130px,auto)]">
+                <span>ID</span>
+                <span>Название</span>
+                <span>Единица</span>
+                <span>В товарах</span>
+                <span>Действия</span>
+              </div>
+              <article v-for="attribute in attributes" :key="attribute.id"
+                class="admin-data-row lg:grid-cols-[90px_minmax(200px,1fr)_minmax(130px,0.7fr)_minmax(100px,0.6fr)_minmax(130px,auto)]">
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">ID</div>
+                  <div class="admin-cell-value">#{{ attribute.id }}</div>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Название</div>
+                  <input v-if="editingId === attribute.id" v-model="editing.name"
+                    @keydown.enter.prevent="saveEdit(attribute.id)" />
+                  <strong v-else class="text-sm text-stone-950 dark:text-white">{{ attribute.name }}</strong>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Единица</div>
+                  <input v-if="editingId === attribute.id" v-model="editing.unit"
+                    @keydown.enter.prevent="saveEdit(attribute.id)" />
+                  <span v-else class="admin-cell-value">{{ attribute.unit || "—" }}</span>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">В товарах</div>
+                  <span class="badge-green">{{ attribute._count.productAttributes }}</span>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Действия</div>
+                  <div class="admin-actions-row">
+                    <template v-if="editingId === attribute.id">
+                      <button class="admin-icon-action" type="button" title="Сохранить"
+                        @click="saveEdit(attribute.id)">
+                        <Check />
+                      </button>
+                      <button class="admin-icon-action" type="button" title="Отмена" @click="editingId = null">
+                        <X />
+                      </button>
+                    </template>
+                    <template v-else>
+                      <button class="admin-icon-action" type="button" title="Редактировать"
+                        @click="startEdit(attribute)">
+                        <Pencil />
+                      </button>
+                      <button class="admin-icon-danger" type="button" title="Удалить"
+                        @click="deleteAttribute(attribute)">
+                        <Trash2 />
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </article>
+            </div>
           </div>
-          <div v-else>Атрибутов пока нет</div>
+          <div v-else class="admin-empty">Атрибутов пока нет</div>
         </div>
       </section>
     </div>

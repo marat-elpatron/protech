@@ -93,12 +93,12 @@ async function submitBulkDelivery(rows: { productId: number; quantity: number }[
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Inventory" title="Склад и поставки"
       description="Добавляйте приходы товаров и корректируйте фактические остатки" />
 
-    <div>
-      <section>
+    <div class="admin-stack">
+      <section class="admin-metrics-grid">
         <AdminMetricCard title="Склад" :value="stocks.length" description="Позиций на складе" :icon="Warehouse" />
         <AdminMetricCard title="Низкий остаток" :value="stocks.filter((item) => item.quantity <= 5).length"
           description="Товаров нужно пополнить" :icon="PackagePlus" tone="amber" />
@@ -109,68 +109,73 @@ async function submitBulkDelivery(rows: { productId: number; quantity: number }[
       <AdminBulkStockDelivery ref="bulkDelivery" :stocks="stocks" :submitting="bulkSubmitting"
         @submit="submitBulkDelivery" />
 
-      <section>
-        <div>
+      <section class="admin-filter-bar">
+        <div class="max-w-2xl">
           <AdminSearchInput v-model="search" placeholder="Поиск по товару или артикулу" />
         </div>
       </section>
 
-      <section>
-        <div>
+      <section class="admin-card">
+        <div class="admin-card-header">
           <div>
-            <h2>Остатки</h2>
-            <p>Поставка прибавляется к текущему остатку</p>
+            <h2 class="admin-card-heading">Остатки</h2>
+            <p class="admin-card-copy">Поставка прибавляется к текущему остатку</p>
           </div>
         </div>
         <div>
-          <div v-if="pending">Загружаю склад...</div>
+          <div v-if="pending" class="admin-loading">Загружаю склад...</div>
           <div v-else-if="filteredStocks.length">
-            <table>
-              <thead>
-                <tr>
-                  <th>Товар</th>
-                  <th>Текущий остаток</th>
-                  <th>Добавить поставку</th>
-                  <th>Установить остаток</th>
-                  <th>Обновлено</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in filteredStocks" :key="item.id">
-                  <td>
-                    <div>
-                      <p>{{ item.product.name }}</p>
-                      <p>{{ item.product.article }}</p>
-                    </div>
-                  </td>
-                  <td>
-                    <span :class="item.quantity <= 5 ? 'badge-amber' : 'badge-green'">
-                      {{ item.quantity }} шт.
-                    </span>
-                  </td>
-                  <td>
-                    <form @submit.prevent="addDelivery(item)">
-                      <input v-model.number="deliveries[item.product.id]" min="1" step="1" type="number"
-                        placeholder="+ шт." />
-                      <button type="submit" :disabled="updating === item.product.id">
-                        <Truck />
-                        Приход
-                      </button>
-                    </form>
-                  </td>
-                  <td>
-                    <form @submit.prevent="setExactQuantity(item)">
-                      <input v-model.number="exact[item.product.id]" min="0" step="1" type="number"
-                        placeholder="остаток" />
-                      <button type="submit" :disabled="updating === item.product.id">Сохранить</button>
-                    </form>
-                  </td>
-                  <td>{{ formatDate(item.updatedAt) }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="admin-data-list">
+              <div
+                class="admin-data-header lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,0.7fr)_minmax(230px,1fr)_minmax(230px,1fr)_minmax(150px,0.8fr)]">
+                <span>Товар</span>
+                <span>Текущий остаток</span>
+                <span>Добавить поставку</span>
+                <span>Установить остаток</span>
+                <span>Обновлено</span>
+              </div>
+              <article v-for="item in filteredStocks" :key="item.id"
+                class="admin-data-row lg:grid-cols-[minmax(220px,1.4fr)_minmax(120px,0.7fr)_minmax(230px,1fr)_minmax(230px,1fr)_minmax(150px,0.8fr)]">
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Товар</div>
+                  <p class="admin-product-name">{{ item.product.name }}</p>
+                  <p class="admin-product-meta">{{ item.product.article }}</p>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Текущий остаток</div>
+                  <span :class="item.quantity <= 5 ? 'badge-amber' : 'badge-green'">
+                    {{ item.quantity }} шт.
+                  </span>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Добавить поставку</div>
+                  <form class="admin-inline-form" @submit.prevent="addDelivery(item)">
+                    <input v-model.number="deliveries[item.product.id]" min="1" step="1" type="number"
+                      placeholder="+ шт." />
+                    <button class="admin-button-primary" type="submit" :disabled="updating === item.product.id">
+                      <Truck />
+                      Приход
+                    </button>
+                  </form>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Установить остаток</div>
+                  <form class="admin-inline-form" @submit.prevent="setExactQuantity(item)">
+                    <input v-model.number="exact[item.product.id]" min="0" step="1" type="number"
+                      placeholder="остаток" />
+                    <button class="admin-button-secondary" type="submit" :disabled="updating === item.product.id">
+                      Сохранить
+                    </button>
+                  </form>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Обновлено</div>
+                  <div class="admin-cell-value">{{ formatDate(item.updatedAt) }}</div>
+                </div>
+              </article>
+            </div>
           </div>
-          <div v-else>Товары на складе не найдены</div>
+          <div v-else class="admin-empty">Товары на складе не найдены</div>
         </div>
       </section>
     </div>

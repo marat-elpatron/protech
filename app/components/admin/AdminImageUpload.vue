@@ -46,20 +46,21 @@ async function handleFile(event: Event) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-image-upload">
     <label v-if="label">{{ label }}</label>
-    <div>
+    <div :class="['admin-image-drop', { compact }]">
       <img v-if="modelValue" :src="modelValue" alt="" />
-      <div v-else>
+      <div v-else class="admin-image-placeholder">
         <Loader2 v-if="uploading" />
         <ImagePlus v-else />
         <span>{{ uploading ? "Загрузка..." : "Перетащите или выберите файл" }}</span>
       </div>
       <input type="file" accept="image/*" :disabled="uploading" @change="handleFile" />
     </div>
-    <div>
+    <div class="admin-image-url">
       <input v-model="inputValue" placeholder="/uploads/image.webp или https://..." />
-      <button v-if="modelValue" type="button" title="Очистить" @click="emit('update:modelValue', '')">
+      <button v-if="modelValue" class="admin-icon-danger" type="button" title="Очистить"
+        @click="emit('update:modelValue', '')">
         <X />
       </button>
     </div>

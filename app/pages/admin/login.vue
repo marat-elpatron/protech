@@ -38,12 +38,12 @@ async function submit() {
 </script>
 
 <template>
-  <main>
-    <section>
-      <NuxtLink to="/admin" aria-label="Protech">
+  <main class="admin-login">
+    <section class="admin-login-hero">
+      <NuxtLink class="admin-logo" to="/admin" aria-label="Protech">
         <Zap :size="22" />
       </NuxtLink>
-      <div>
+      <div class="admin-login-copy">
         <div>Protech control room</div>
         <h1>Панель управления магазином</h1>
         <p>
@@ -51,42 +51,42 @@ async function submit() {
         </p>
       </div>
       <div>
-        <span>
+        <span class="badge-green gap-2">
           <ShieldCheck />
           Только для администраторов
         </span>
       </div>
     </section>
 
-    <section>
+    <section class="admin-login-panel">
       <form @submit.prevent="submit">
-        <div>
+        <div class="admin-login-form-head">
           <div>
-            <div>Вход</div>
+            <div class="admin-login-eyebrow">Вход</div>
             <h1>Добро пожаловать</h1>
             <p>Используйте учетную запись администратора.</p>
           </div>
           <AdminThemeToggle />
         </div>
 
-        <div>
+        <div class="admin-field">
           <label for="login-email">Email</label>
-          <div>
+          <div class="admin-login-input">
             <Mail />
             <input id="login-email" v-model="email" autocomplete="email" placeholder="admin@protech.ru" type="email" />
           </div>
         </div>
 
-        <div>
+        <div class="admin-field">
           <label for="login-password">Пароль</label>
-          <div>
+          <div class="admin-login-input">
             <LockKeyhole />
             <input id="login-password" v-model="password" autocomplete="current-password" placeholder="••••••••"
               type="password" />
           </div>
         </div>
 
-        <button type="submit" :disabled="loading">
+        <button class="admin-button-primary w-full" type="submit" :disabled="loading">
           {{ loading ? "Проверяю доступ..." : "Войти в админку" }}
         </button>
       </form>

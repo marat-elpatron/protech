@@ -111,53 +111,54 @@ defineExpose({ reset });
 </script>
 
 <template>
-  <section>
-    <div>
+  <section class="admin-card">
+    <div class="admin-card-header">
       <div>
-        <h2>Массовая поставка</h2>
-        <p>Добавьте несколько товаров и примените приход одной операцией</p>
+        <h2 class="admin-card-heading">Массовая поставка</h2>
+        <p class="admin-card-copy">Добавьте несколько товаров и примените приход одной операцией</p>
       </div>
       <Truck />
     </div>
 
-    <form @submit.prevent="submit">
-      <div>
-        <div v-for="(row, index) in rows" :key="row.key">
-          <div>
+    <form class="space-y-4" @submit.prevent="submit">
+      <div class="space-y-3">
+        <div v-for="(row, index) in rows" :key="row.key" class="admin-bulk-row">
+          <div class="admin-field">
             <label :for="`bulk-product-${row.key}`">Товар</label>
             <AdminSelect :model-value="row.productId" :options="optionsFor(row)" placeholder="Выберите товар"
               :aria-label="`Товар в строке поставки ${index + 1}`" @update:model-value="row.productId = $event" />
           </div>
 
-          <div>
+          <div class="admin-field">
             <label :for="`bulk-quantity-${row.key}`">Количество</label>
             <input :id="`bulk-quantity-${row.key}`" v-model.number="row.quantity" min="1" step="1" type="number"
               placeholder="шт." />
           </div>
 
-          <div>
-            <span>Сейчас</span>
-            <strong>{{ stockByProductId.get(row.productId)?.quantity ?? "—" }} шт.</strong>
+          <div class="admin-stat p-3">
+            <span class="admin-stat-label">Сейчас</span>
+            <strong class="admin-stat-value text-base">{{ stockByProductId.get(row.productId)?.quantity ?? "—" }}
+              шт.</strong>
           </div>
 
-          <button type="button" title="Удалить строку" @click="removeRow(index)">
+          <button class="admin-icon-danger" type="button" title="Удалить строку" @click="removeRow(index)">
             <Trash2 />
           </button>
         </div>
       </div>
 
-      <div>
-        <button type="button" @click="addRow">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <button class="admin-button-secondary" type="button" @click="addRow">
           <Plus />
           Добавить строку
         </button>
 
-        <div>
+        <div class="flex flex-wrap gap-2 text-sm text-stone-500 dark:text-stone-400">
           <span>{{ rows.length }} строк</span>
           <span>{{ totalQuantity }} шт. в поставке</span>
         </div>
 
-        <button type="submit" :disabled="submitting">
+        <button class="admin-button-primary" type="submit" :disabled="submitting">
           <Truck />
           {{ submitting ? "Применяю..." : "Загрузить поставку" }}
         </button>

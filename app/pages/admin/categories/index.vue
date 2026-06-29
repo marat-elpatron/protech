@@ -71,79 +71,83 @@ async function deleteCategory(category: CategoryItem) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Catalog" title="Категории"
       description="Создание, редактирование и удаление товарных категорий" />
 
-    <div>
-      <section>
-        <div>
+    <div class="admin-stack">
+      <section class="admin-card">
+        <div class="admin-card-header">
           <div>
-            <h2>Новая категория</h2>
-            <p>Категорию можно также создать прямо из формы товара</p>
+            <h2 class="admin-card-heading">Новая категория</h2>
+            <p class="admin-card-copy">Категорию можно также создать прямо из формы товара</p>
           </div>
           <FolderPlus />
         </div>
-        <form @submit.prevent="createCategory">
+        <form class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]" @submit.prevent="createCategory">
           <input v-model="newName" placeholder="Например, Смартфоны" />
-          <button type="submit" :disabled="saving">
+          <button class="admin-button-primary" type="submit" :disabled="saving">
             <FolderPlus />
             {{ saving ? "Создание..." : "Создать категорию" }}
           </button>
         </form>
       </section>
 
-      <section>
-        <div>
+      <section class="admin-card">
+        <div class="admin-card-header">
           <div>
-            <h2>Все категории</h2>
-            <p>{{ categories.length }} записей</p>
+            <h2 class="admin-card-heading">Все категории</h2>
+            <p class="admin-card-copy">{{ categories.length }} записей</p>
           </div>
         </div>
         <div>
-          <div v-if="pending">Загружаю категории...</div>
+          <div v-if="pending" class="admin-loading">Загружаю категории...</div>
           <div v-else-if="categories.length">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Название</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="category in categories" :key="category.id">
-                  <td>{{ category.id }}</td>
-                  <td>
-                    <input v-if="editingId === category.id" v-model="editingName"
-                      @keydown.enter.prevent="saveEdit(category.id)" />
-                    <strong v-else>{{ category.name }}</strong>
-                  </td>
-                  <td>
-                    <div>
-                      <template v-if="editingId === category.id">
-                        <button type="button" title="Сохранить" @click="saveEdit(category.id)">
-                          <Check />
-                        </button>
-                        <button type="button" title="Отмена" @click="editingId = null">
-                          <X />
-                        </button>
-                      </template>
-                      <template v-else>
-                        <button type="button" title="Редактировать" @click="startEdit(category)">
-                          <Pencil />
-                        </button>
-                        <button type="button" title="Удалить" @click="deleteCategory(category)">
-                          <Trash2 />
-                        </button>
-                      </template>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="admin-data-list">
+              <div class="admin-data-header lg:grid-cols-[90px_minmax(220px,1fr)_minmax(120px,auto)]">
+                <span>ID</span>
+                <span>Название</span>
+                <span>Действия</span>
+              </div>
+              <article v-for="category in categories" :key="category.id"
+                class="admin-data-row lg:grid-cols-[90px_minmax(220px,1fr)_minmax(120px,auto)]">
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">ID</div>
+                  <div class="admin-cell-value">#{{ category.id }}</div>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Название</div>
+                  <input v-if="editingId === category.id" v-model="editingName"
+                    @keydown.enter.prevent="saveEdit(category.id)" />
+                  <strong v-else class="text-sm text-stone-950 dark:text-white">{{ category.name }}</strong>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Действия</div>
+                  <div class="admin-actions-row">
+                    <template v-if="editingId === category.id">
+                      <button class="admin-icon-action" type="button" title="Сохранить"
+                        @click="saveEdit(category.id)">
+                        <Check />
+                      </button>
+                      <button class="admin-icon-action" type="button" title="Отмена" @click="editingId = null">
+                        <X />
+                      </button>
+                    </template>
+                    <template v-else>
+                      <button class="admin-icon-action" type="button" title="Редактировать" @click="startEdit(category)">
+                        <Pencil />
+                      </button>
+                      <button class="admin-icon-danger" type="button" title="Удалить"
+                        @click="deleteCategory(category)">
+                        <Trash2 />
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </article>
+            </div>
           </div>
-          <div v-else>Категорий пока нет</div>
+          <div v-else class="admin-empty">Категорий пока нет</div>
         </div>
       </section>
     </div>

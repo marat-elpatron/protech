@@ -61,7 +61,7 @@ async function addPrice() {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Catalog" :title="product?.name || 'Редактирование товара'"
       :description="product ? `Артикул ${product.article}` : 'Загрузка карточки товара'">
       <template #actions>
@@ -69,67 +69,68 @@ async function addPrice() {
       </template>
     </AdminHeader>
 
-    <div>
-      <div v-if="productPending">Загружаю товар...</div>
+    <div class="admin-stack">
+      <div v-if="productPending" class="admin-loading">Загружаю товар...</div>
 
       <template v-else-if="product">
-        <section>
-          <div>
+        <section class="admin-card">
+          <div class="admin-card-header">
             <div>
-              <h2>Управление ценой</h2>
-              <p>Новая цена автоматически станет текущей и попадет в историю</p>
+              <h2 class="admin-card-heading">Управление ценой</h2>
+              <p class="admin-card-copy">Новая цена автоматически станет текущей и попадет в историю</p>
             </div>
             <Banknote />
           </div>
-          <div>
-            <div>
-              <div>
-                <p>Текущая цена</p>
-                <p>{{ formatPrice(product.currentPrice) }}</p>
+          <div class="space-y-5">
+            <div class="admin-stats-strip">
+              <div class="admin-stat">
+                <p class="admin-stat-label">Текущая цена</p>
+                <p class="admin-stat-value">{{ formatPrice(product.currentPrice) }}</p>
               </div>
-              <div>
-                <p>Предыдущая цена</p>
-                <p>{{ product.oldPrice ? formatPrice(product.oldPrice) : "—" }}</p>
+              <div class="admin-stat">
+                <p class="admin-stat-label">Предыдущая цена</p>
+                <p class="admin-stat-value">{{ product.oldPrice ? formatPrice(product.oldPrice) : "—" }}</p>
               </div>
-              <div>
-                <p>Остаток</p>
-                <p>{{ product.productStocks[0]?.quantity ?? 0 }} шт.</p>
+              <div class="admin-stat">
+                <p class="admin-stat-label">Остаток</p>
+                <p class="admin-stat-value">{{ product.productStocks[0]?.quantity ?? 0 }} шт.</p>
               </div>
-              <div>
-                <p>Обновлен</p>
-                <p>{{ formatDate(product.updatedAt) }}</p>
+              <div class="admin-stat">
+                <p class="admin-stat-label">Обновлен</p>
+                <p class="admin-stat-value">{{ formatDate(product.updatedAt) }}</p>
               </div>
             </div>
 
-            <form @submit.prevent="addPrice">
-              <div>
+            <form class="grid gap-3 sm:grid-cols-[minmax(180px,320px)_auto] sm:items-end" @submit.prevent="addPrice">
+              <div class="admin-field">
                 <label for="new-price">Новая цена</label>
                 <input id="new-price" v-model.number="newPrice" min="0" step="0.01" type="number" placeholder="99000" />
               </div>
-              <button type="submit" :disabled="addingPrice">
+              <button class="admin-button-primary" type="submit" :disabled="addingPrice">
                 <Plus />
                 {{ addingPrice ? "Добавление..." : "Добавить цену" }}
               </button>
             </form>
 
-            <div v-if="product.productPrices?.length">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Цена</th>
-                    <th>Дата</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="price in product.productPrices" :key="price.id">
-                    <td><strong>{{ formatPrice(price.value) }}</strong></td>
-                    <td>
-                      <Clock3 />
-                      {{ formatDate(price.createdAt) }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-if="product.productPrices?.length" class="admin-data-list">
+              <div class="admin-data-header lg:grid-cols-[minmax(130px,0.5fr)_minmax(180px,1fr)]">
+                <span>Цена</span>
+                <span>Дата</span>
+              </div>
+              <article v-for="price in product.productPrices" :key="price.id"
+                class="admin-data-row lg:grid-cols-[minmax(130px,0.5fr)_minmax(180px,1fr)]">
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Цена</div>
+                  <strong class="text-sm text-stone-950 dark:text-white">{{ formatPrice(price.value) }}</strong>
+                </div>
+                <div class="admin-data-cell">
+                  <div class="admin-cell-label">Дата</div>
+                  <div class="admin-actions-row text-sm text-stone-600 dark:text-stone-300">
+                    <Clock3 class="size-4 text-emerald-600 dark:text-emerald-300" />
+                    {{ formatDate(price.createdAt) }}
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
         </section>
@@ -138,7 +139,7 @@ async function addPrice() {
           @submit="submit" />
       </template>
 
-      <div v-else>Товар не найден</div>
+      <div v-else class="admin-empty">Товар не найден</div>
     </div>
   </div>
 </template>

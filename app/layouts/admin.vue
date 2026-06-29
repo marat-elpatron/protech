@@ -48,40 +48,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <aside>
-      <div>
-        <NuxtLink to="/admin" aria-label="Protech Admin">
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-head">
+        <NuxtLink class="admin-logo" to="/admin" aria-label="Protech Admin">
           <Zap :size="21" />
         </NuxtLink>
-        <div>
-          <p>Protech</p>
-          <p>администрирование</p>
+        <div class="admin-brand">
+          <p class="admin-brand-title">Protech</p>
+          <p class="admin-brand-subtitle">администрирование</p>
         </div>
-        <div>
+        <div class="admin-theme-desktop">
           <AdminThemeToggle />
         </div>
       </div>
 
-      <nav aria-label="Разделы админ-панели">
+      <nav class="admin-nav" aria-label="Разделы админ-панели">
         <NuxtLink v-for="item in navItems" :key="item.href" :to="item.href"
-          :class="{ 'is-active': isActive(item.href) }">
+          :class="['admin-nav-link', { 'is-active': isActive(item.href) }]">
           <component :is="item.icon" />
           <span>{{ item.title }}</span>
         </NuxtLink>
       </nav>
 
-      <div>
-        <div>
-          <div>{{ initials }}</div>
-          <div>
-            <div>{{ auth.user?.name || "Администратор" }}</div>
-            <div>{{ auth.user?.email }}</div>
+      <div class="admin-sidebar-user">
+        <div class="admin-user-card">
+          <div class="admin-user-avatar">{{ initials }}</div>
+          <div class="min-w-0">
+            <div class="admin-user-name">{{ auth.user?.name || "Администратор" }}</div>
+            <div class="admin-user-email">{{ auth.user?.email }}</div>
           </div>
         </div>
-        <div>
+        <div class="admin-sidebar-actions">
           <AdminThemeToggle />
-          <button type="button" @click="handleSignOut">
+          <button class="admin-button-secondary flex-1" type="button" @click="handleSignOut">
             <LogOut />
             Выйти
           </button>
@@ -89,7 +89,7 @@ onMounted(() => {
       </div>
     </aside>
 
-    <main>
+    <main class="admin-main">
       <slot />
     </main>
   </div>

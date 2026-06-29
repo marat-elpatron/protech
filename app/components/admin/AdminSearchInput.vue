@@ -17,7 +17,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div>
+  <div class="admin-search">
     <Search />
     <input :value="modelValue" :placeholder="placeholder"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)" />

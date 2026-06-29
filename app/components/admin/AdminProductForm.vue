@@ -230,147 +230,145 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit">
-    <div>
-      <div>
-        <section>
-          <div>
+  <form class="admin-product-form" @submit.prevent="handleSubmit">
+    <div class="admin-form-layout">
+      <div class="admin-form-column">
+        <section class="admin-card">
+          <div class="admin-card-header">
             <div>
-              <h2>Основная информация</h2>
-              <p>Название, описание, категория и статус публикации</p>
+              <h2 class="admin-card-heading">Основная информация</h2>
+              <p class="admin-card-copy">Название, описание, категория и статус публикации</p>
             </div>
           </div>
-          <div>
-            <div>
-              <div>
+          <div class="space-y-5">
+            <div class="admin-form-grid">
+              <div class="admin-field">
                 <label for="product-name">Название</label>
                 <input id="product-name" v-model="form.name" placeholder="Например, iPhone 15 Pro" />
               </div>
-              <div>
+              <div class="admin-field">
                 <label for="product-article">Артикул</label>
                 <input id="product-article" v-model="form.article" placeholder="SKU-001" />
               </div>
-              <div>
+              <div class="admin-field">
                 <label for="product-category">Категория</label>
                 <AdminSelect v-model="categoryModel" :options="categoryOptions" placeholder="Выберите категорию"
                   aria-label="Категория товара" />
               </div>
             </div>
 
-            <div>
+            <div class="admin-field">
               <label for="product-description">Описание</label>
               <textarea id="product-description" v-model="form.description" rows="6" />
             </div>
 
-            <div>
+            <div class="flex flex-col gap-3 rounded-2xl bg-emerald-50/65 p-4 dark:bg-emerald-400/8 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div>Показывать в каталоге</div>
-                <div>Неактивные товары остаются в админке, но скрыты от покупателей.</div>
+                <div class="text-sm font-bold text-stone-950 dark:text-white">Показывать в каталоге</div>
+                <div class="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                  Неактивные товары остаются в админке, но скрыты от покупателей.
+                </div>
               </div>
-              <button :class="{ active: form.isActive }" type="button" :aria-pressed="form.isActive"
+              <button :class="['admin-switch', { active: form.isActive }]" type="button" :aria-pressed="form.isActive"
                 @click="form.isActive = !form.isActive" />
             </div>
 
-            <div>
-              <div>
+            <div class="space-y-3 rounded-2xl bg-stone-50/85 p-4 dark:bg-neutral-950/45">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <div>
-                    <h3>Быстро создать категорию</h3>
-                    <p>Новая категория сразу привяжется к товару</p>
-                  </div>
-                  <button type="button" :disabled="creatingCategory" @click="createCategory">
-                    <Plus />
-                    {{ creatingCategory ? "Создание..." : "Создать" }}
-                  </button>
+                  <h3 class="text-sm font-bold text-stone-950 dark:text-white">Быстро создать категорию</h3>
+                  <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Новая категория сразу привяжется к товару</p>
                 </div>
-                <input v-model="newCategoryName" placeholder="Название новой категории"
-                  @keydown.enter.prevent="createCategory" />
+                <button class="admin-button-secondary" type="button" :disabled="creatingCategory"
+                  @click="createCategory">
+                  <Plus />
+                  {{ creatingCategory ? "Создание..." : "Создать" }}
+                </button>
               </div>
+              <input v-model="newCategoryName" placeholder="Название новой категории"
+                @keydown.enter.prevent="createCategory" />
             </div>
           </div>
         </section>
 
-        <section>
-          <div>
+        <section class="admin-card">
+          <div class="admin-card-header">
             <div>
-              <h2>Атрибуты товара</h2>
-              <p>Технические характеристики можно создать прямо здесь</p>
+              <h2 class="admin-card-heading">Атрибуты товара</h2>
+              <p class="admin-card-copy">Технические характеристики можно создать прямо здесь</p>
             </div>
-            <button type="button" @click="addAttributeRow">
+            <button class="admin-button-secondary" type="button" @click="addAttributeRow">
               <Plus />
               Добавить
             </button>
           </div>
-          <div>
-            <div>
-              <div>
-                <div>
-                  <div>
+          <div class="space-y-4">
+            <div class="rounded-2xl bg-stone-50/85 p-4 dark:bg-neutral-950/45">
+              <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+                <div class="admin-form-grid-2">
+                  <div class="admin-field">
                     <label for="new-attribute-name">Новый атрибут</label>
                     <input id="new-attribute-name" v-model="newAttributeName" placeholder="Мощность" />
                   </div>
-                  <div>
+                  <div class="admin-field">
                     <label for="new-attribute-unit">Единица</label>
                     <input id="new-attribute-unit" v-model="newAttributeUnit" placeholder="Вт, ГБ, мм" />
                   </div>
                 </div>
-                <div>
-                  <button type="button" :disabled="creatingAttribute" @click="createAttribute">
-                    <Plus />
-                    {{ creatingAttribute ? "Создание..." : "Создать атрибут" }}
-                  </button>
-                </div>
+                <button class="admin-button-secondary" type="button" :disabled="creatingAttribute"
+                  @click="createAttribute">
+                  <Plus />
+                  {{ creatingAttribute ? "Создание..." : "Создать атрибут" }}
+                </button>
               </div>
             </div>
 
-            <div v-if="form.productAttributes.length">
-              <div v-for="(item, index) in form.productAttributes" :key="index">
+            <div v-if="form.productAttributes.length" class="space-y-3">
+              <div v-for="(item, index) in form.productAttributes" :key="index" class="admin-attribute-row">
                 <AdminSelect :model-value="item.attributeId ? String(item.attributeId) : ''" :options="attributeOptions"
                   placeholder="Атрибут" :aria-label="`Атрибут ${index + 1}`"
                   @update:model-value="item.attributeId = Number($event)" />
                 <input v-model="item.value" placeholder="Значение" />
-                <button type="button" @click="form.productAttributes.splice(index, 1)">
+                <button class="admin-icon-danger" type="button" @click="form.productAttributes.splice(index, 1)">
                   <Trash2 />
                 </button>
               </div>
             </div>
-            <div v-else>Характеристики пока не добавлены</div>
+            <div v-else class="admin-empty !min-h-24">Характеристики пока не добавлены</div>
           </div>
         </section>
       </div>
 
-      <div>
-        <section>
-          <div>
+      <div class="admin-form-column">
+        <section class="admin-card">
+          <div class="admin-card-header">
             <div>
-              <h2>Главное фото</h2>
-              <p>Используется в каталоге и карточке товара</p>
+              <h2 class="admin-card-heading">Главное фото</h2>
+              <p class="admin-card-copy">Используется в каталоге и карточке товара</p>
             </div>
           </div>
-          <div>
-            <AdminImageUpload v-model="form.mainImage" label="" />
-          </div>
+          <AdminImageUpload v-model="form.mainImage" label="" />
         </section>
 
-        <section>
-          <div>
+        <section class="admin-card">
+          <div class="admin-card-header">
             <div>
-              <h2>Цена и маркетплейс</h2>
-              <p>Текущая цена, старая цена и ссылка на Ozon</p>
+              <h2 class="admin-card-heading">Цена и маркетплейс</h2>
+              <p class="admin-card-copy">Текущая цена, старая цена и ссылка на Ozon</p>
             </div>
           </div>
-          <div>
-            <div>
-              <div>
+          <div class="space-y-4">
+            <div class="admin-form-grid-2">
+              <div class="admin-field">
                 <label for="current-price">Цена</label>
                 <input id="current-price" v-model.number="form.currentPrice" min="0" step="0.01" type="number" />
               </div>
-              <div>
+              <div class="admin-field">
                 <label for="old-price">Старая цена</label>
                 <input id="old-price" v-model.number="form.oldPrice" min="0" step="0.01" type="number" />
               </div>
             </div>
-            <div>
+            <div class="admin-field">
               <label for="ozon-link">Ссылка Ozon</label>
               <input id="ozon-link" v-model="form.ozonLink" placeholder="https://ozon.ru/..." />
             </div>
@@ -379,34 +377,32 @@ function handleSubmit() {
       </div>
     </div>
 
-    <section>
-      <div>
+    <section class="admin-card">
+      <div class="admin-card-header">
         <div>
-          <h2>Галерея</h2>
-          <p>Дополнительные изображения товара</p>
+          <h2 class="admin-card-heading">Галерея</h2>
+          <p class="admin-card-copy">Дополнительные изображения товара</p>
         </div>
-        <button type="button" @click="addGalleryImage">
+        <button class="admin-button-secondary" type="button" @click="addGalleryImage">
           <Plus />
           Добавить фото
         </button>
       </div>
-      <div>
-        <div v-if="form.productImages.length">
-          <div v-for="(image, index) in form.productImages" :key="index">
-            <AdminImageUpload :model-value="image.url" compact label="" @update:model-value="image.url = $event" />
-            <button type="button" @click="form.productImages.splice(index, 1)">
-              <Trash2 />
-              Удалить
-            </button>
-          </div>
+      <div v-if="form.productImages.length" class="admin-gallery-grid">
+        <div v-for="(image, index) in form.productImages" :key="index" class="admin-gallery-card">
+          <AdminImageUpload :model-value="image.url" compact label="" @update:model-value="image.url = $event" />
+          <button class="admin-button-danger mt-3 w-full" type="button" @click="form.productImages.splice(index, 1)">
+            <Trash2 />
+            Удалить
+          </button>
         </div>
-        <div v-else>Дополнительные изображения пока не добавлены</div>
       </div>
+      <div v-else class="admin-empty !min-h-28">Дополнительные изображения пока не добавлены</div>
     </section>
 
-    <div>
-      <button type="button" @click="router.back()">Отмена</button>
-      <button type="submit" :disabled="loading">
+    <div class="admin-form-actions">
+      <button class="admin-button-secondary" type="button" @click="router.back()">Отмена</button>
+      <button class="admin-button-primary" type="submit" :disabled="loading">
         <Save />
         {{ loading ? "Сохранение..." : initial ? "Сохранить товар" : "Создать товар" }}
       </button>

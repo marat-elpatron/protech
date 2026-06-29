@@ -29,7 +29,7 @@ async function submit(payload: Record<string, unknown>) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Catalog" title="Новый товар"
       description="Создайте карточку товара, категорию и атрибуты за один проход" />
 

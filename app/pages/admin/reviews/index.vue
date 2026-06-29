@@ -48,34 +48,32 @@ async function answerReview(review: ReviewItem) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Community" title="Отзывы" description="Отвечайте покупателям и закрывайте отзывы без ответа" />
 
-    <div>
-      <section>
-        <div>
-          <div>
+    <div class="admin-stack">
+      <section class="admin-filter-bar">
+        <div class="admin-segmented">
             <button type="button" :class="{ active: !pendingOnly }" @click="pendingOnly = false">Все отзывы</button>
             <button type="button" :class="{ active: pendingOnly }" @click="pendingOnly = true">Без ответа</button>
-          </div>
         </div>
       </section>
 
-      <div v-if="pending">Загружаю отзывы...</div>
-      <div v-else-if="reviews?.items.length">
-        <article v-for="review in reviews.items" :key="review.id">
-          <div>
-            <div>
-              <img :src="review.product.mainImage" :alt="review.product.name" />
+      <div v-if="pending" class="admin-loading">Загружаю отзывы...</div>
+      <div v-else-if="reviews?.items.length" class="space-y-5">
+        <article v-for="review in reviews.items" :key="review.id" class="admin-message-card">
+          <div class="admin-message-head">
+            <div class="admin-product-cell">
+              <img class="admin-product-image" :src="review.product.mainImage" :alt="review.product.name" />
               <div>
-                <h2>{{ review.product.name }}</h2>
-                <p>
+                <h2 class="admin-card-heading">{{ review.product.name }}</h2>
+                <p class="admin-card-copy">
                   {{ review.user.name || review.user.email }} · {{ formatDate(review.createdAt) }}
                 </p>
               </div>
             </div>
-            <div>
-              <span>
+            <div class="admin-actions-row">
+              <span class="badge-amber gap-1.5">
                 <Star />
                 {{ review.rating }}/5
               </span>
@@ -83,38 +81,38 @@ async function answerReview(review: ReviewItem) {
             </div>
           </div>
 
-          <div>
-            <div>
-              <div v-if="review.advantages">
+          <div class="admin-message-body">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div v-if="review.advantages" class="admin-note">
                 <strong>Плюсы:</strong>
                 <div>{{ review.advantages }}</div>
               </div>
-              <div v-if="review.disadvantages">
+              <div v-if="review.disadvantages" class="admin-note">
                 <strong>Минусы:</strong>
                 <div>{{ review.disadvantages }}</div>
               </div>
             </div>
 
-            <div v-if="review.comment">
+            <div v-if="review.comment" class="admin-note">
               <strong>Комментарий:</strong>
               <div>{{ review.comment }}</div>
             </div>
 
-            <div v-if="review.reviewPhotos.length">
+            <div v-if="review.reviewPhotos.length" class="admin-photo-strip">
               <img v-for="photo in review.reviewPhotos" :key="photo.id" :src="photo.url" alt="" />
             </div>
 
-            <div v-if="review.reviewAnswers.length">
-              <div v-for="answer in review.reviewAnswers" :key="answer.id">
+            <div v-if="review.reviewAnswers.length" class="space-y-3">
+              <div v-for="answer in review.reviewAnswers" :key="answer.id" class="admin-answer">
                 <strong>{{ answer.user?.name || "Администратор" }}</strong>
                 <div>{{ answer.text }}</div>
               </div>
             </div>
 
-            <form @submit.prevent="answerReview(review)">
+            <form class="space-y-3" @submit.prevent="answerReview(review)">
               <textarea v-model="answers[review.id]" rows="4" placeholder="Ответ администратора" />
-              <div>
-                <button type="submit" :disabled="sending === review.id">
+              <div class="flex justify-end">
+                <button class="admin-button-primary" type="submit" :disabled="sending === review.id">
                   <Send />
                   {{ sending === review.id ? "Отправка..." : "Ответить" }}
                 </button>
@@ -123,14 +121,15 @@ async function answerReview(review: ReviewItem) {
           </div>
         </article>
 
-        <div v-if="reviews.pagination.pages > 1">
-          <button type="button" :disabled="page <= 1" @click="page--">Назад</button>
+        <div v-if="reviews.pagination.pages > 1" class="admin-pagination">
+          <button class="admin-button-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
           <span>Страница {{ reviews.pagination.page }} из {{ reviews.pagination.pages }}</span>
-          <button type="button" :disabled="page >= reviews.pagination.pages" @click="page++">Вперед</button>
+          <button class="admin-button-secondary" type="button" :disabled="page >= reviews.pagination.pages"
+            @click="page++">Вперед</button>
         </div>
       </div>
 
-      <div v-else>
+      <div v-else class="admin-empty">
         <MessageSquareReply />
         Отзывов для выбранного фильтра нет
       </div>

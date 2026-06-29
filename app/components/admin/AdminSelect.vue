@@ -46,7 +46,7 @@ function updateValue(value: unknown) {
 
 <template>
   <SelectRoot :model-value="modelValue" :disabled="disabled" @update:model-value="updateValue">
-    <SelectTrigger :aria-label="ariaLabel || placeholder">
+    <SelectTrigger class="admin-select-trigger" :aria-label="ariaLabel || placeholder">
       <SelectValue :placeholder="placeholder" />
       <SelectIcon as-child>
         <ChevronDown />
@@ -54,16 +54,17 @@ function updateValue(value: unknown) {
     </SelectTrigger>
 
     <SelectPortal>
-      <SelectContent position="popper" :side-offset="8">
-        <SelectViewport>
-          <SelectItem v-for="option in options" :key="option.value" :value="option.value" :disabled="option.disabled">
+      <SelectContent class="admin-select-content" position="popper" :side-offset="8">
+        <SelectViewport class="admin-select-viewport">
+          <SelectItem v-for="option in options" :key="option.value" class="admin-select-item" :value="option.value"
+            :disabled="option.disabled">
             <SelectItemText>
               <span>
                 <span>{{ option.label }}</span>
                 <small v-if="option.description">{{ option.description }}</small>
               </span>
             </SelectItemText>
-            <SelectItemIndicator>
+            <SelectItemIndicator class="admin-select-check">
               <Check />
             </SelectItemIndicator>
           </SelectItem>

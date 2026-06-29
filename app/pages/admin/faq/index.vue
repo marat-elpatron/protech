@@ -48,54 +48,52 @@ async function answerQuestion(question: FaqItem) {
 </script>
 
 <template>
-  <div>
+  <div class="admin-page">
     <AdminHeader kicker="Support" title="FAQ"
       description="Отвечайте на вопросы покупателей в разделе вопросов и ответов" />
 
-    <div>
-      <section>
-        <div>
-          <div>
+    <div class="admin-stack">
+      <section class="admin-filter-bar">
+        <div class="admin-segmented">
             <button type="button" :class="{ active: !pendingOnly }" @click="pendingOnly = false">Все вопросы</button>
             <button type="button" :class="{ active: pendingOnly }" @click="pendingOnly = true">Без ответа</button>
-          </div>
         </div>
       </section>
 
-      <div v-if="pending">Загружаю вопросы...</div>
-      <div v-else-if="faq?.items.length">
-        <article v-for="question in faq.items" :key="question.id">
-          <div>
+      <div v-if="pending" class="admin-loading">Загружаю вопросы...</div>
+      <div v-else-if="faq?.items.length" class="space-y-5">
+        <article v-for="question in faq.items" :key="question.id" class="admin-message-card">
+          <div class="admin-message-head">
             <div>
-              <h2>{{ question.title }}</h2>
-              <p>
+              <h2 class="admin-card-heading">{{ question.title }}</h2>
+              <p class="admin-card-copy">
                 {{ question.user.name || question.user.email }} · {{ formatDate(question.createdAt) }}
               </p>
             </div>
             <AdminStatusBadge :status="question.isAnswered" type="answer" />
           </div>
 
-          <div>
-            <div>
+          <div class="admin-message-body">
+            <div class="admin-note">
               <strong>Вопрос:</strong>
               <div>{{ question.comment }}</div>
             </div>
 
-            <div v-if="question.shopQuestionImages.length">
+            <div v-if="question.shopQuestionImages.length" class="admin-photo-strip">
               <img v-for="image in question.shopQuestionImages" :key="image.id" :src="image.url" alt="" />
             </div>
 
-            <div v-if="question.shopAnswers.length">
-              <div v-for="answer in question.shopAnswers" :key="answer.id">
+            <div v-if="question.shopAnswers.length" class="space-y-3">
+              <div v-for="answer in question.shopAnswers" :key="answer.id" class="admin-answer">
                 <strong>{{ answer.user?.name || "Администратор" }}</strong>
                 <div>{{ answer.comment }}</div>
               </div>
             </div>
 
-            <form @submit.prevent="answerQuestion(question)">
+            <form class="space-y-3" @submit.prevent="answerQuestion(question)">
               <textarea v-model="answers[question.id]" rows="4" placeholder="Ответ на вопрос" />
-              <div>
-                <button type="submit" :disabled="sending === question.id">
+              <div class="flex justify-end">
+                <button class="admin-button-primary" type="submit" :disabled="sending === question.id">
                   <Send />
                   {{ sending === question.id ? "Отправка..." : "Ответить" }}
                 </button>
@@ -104,14 +102,15 @@ async function answerQuestion(question: FaqItem) {
           </div>
         </article>
 
-        <div v-if="faq.pagination.pages > 1">
-          <button type="button" :disabled="page <= 1" @click="page--">Назад</button>
+        <div v-if="faq.pagination.pages > 1" class="admin-pagination">
+          <button class="admin-button-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
           <span>Страница {{ faq.pagination.page }} из {{ faq.pagination.pages }}</span>
-          <button type="button" :disabled="page >= faq.pagination.pages" @click="page++">Вперед</button>
+          <button class="admin-button-secondary" type="button" :disabled="page >= faq.pagination.pages"
+            @click="page++">Вперед</button>
         </div>
       </div>
 
-      <div v-else>
+      <div v-else class="admin-empty">
         <HelpCircle />
         Вопросов для выбранного фильтра нет
       </div>
