@@ -3,6 +3,7 @@ import {
   PaymentStatus,
   Prisma
 } from "@prisma/client";
+import { reserveProductStock, restoreOrderStock } from "~~/server/utils/orderStock";
 import { createYooKassaPayment } from "~~/server/utils/yookassa";
 import { createOrderSchema } from "~~/shared/schemas/user/orders/createOrder"
 
@@ -123,6 +124,7 @@ export default defineEventHandler(async (event) => {
         userId: user.id,
         obtainingMethod: body.obtainingMethod,
         paymentMethod: body.paymentMethod,
+        stockReserved: true,
 
         orderStatus:
           body.paymentMethod === "ONLINE"
@@ -166,19 +168,7 @@ export default defineEventHandler(async (event) => {
       include: orderInclude
     });
 
-    if (body.paymentMethod === "OFFLINE") {
-      for (const item of body.orderItems) {
-        await tx.productStock.updateMany({
-          where: {
-            productId: item.productId,
-            quantity: { gte: item.quantity }
-          },
-          data: {
-            quantity: { decrement: item.quantity }
-          }
-        });
-      }
-    }
+    await reserveProductStock(tx, body.orderItems);
 
     return createdOrder;
   });
@@ -197,6 +187,28 @@ export default defineEventHandler(async (event) => {
     orderId: order.id,
     amount: order.payment!.amount,
     description: `Заказ №${order.id}`
+  }).catch(async (error) => {
+    await prisma.$transaction(async (tx) => {
+      await restoreOrderStock(tx, order.id);
+
+      await tx.payment.update({
+        where: { orderId: order.id },
+        data: {
+          paymentStatus: PaymentStatus.CANCELLED,
+          paidAt: null
+        }
+      });
+
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          orderStatus: OrderStatus.CANCELLED,
+          stockReserved: false
+        }
+      });
+    });
+
+    throw error;
   });
 
   await prisma.payment.update({

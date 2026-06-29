@@ -5,6 +5,7 @@ import {
 } from "@prisma/client";
 import { defineEventHandler } from "h3";
 import { z } from "zod";
+import { reserveOrderStock, restoreOrderStock } from "~~/server/utils/orderStock";
 import { getYooKassaPayment } from "~~/server/utils/yookassa";
 
 const yookassaWebhookSchema = z
@@ -31,13 +32,21 @@ const yookassaWebhookSchema = z
   })
   .passthrough();
 
+function ignored(reason: string) {
+  return {
+    ok: true,
+    ignored: true,
+    reason
+  };
+}
+
 export default defineEventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) => yookassaWebhookSchema.safeParse(body));
 
   if (!result.success) {
     throw createError({
       statusCode: 400,
-      message: "Ошибка валидации данных",
+      message: "Invalid webhook payload",
       data: result.error.flatten((issue) => issue.message).fieldErrors,
     });
   }
@@ -59,17 +68,40 @@ export default defineEventHandler(async (event) => {
     },
     include: {
       order: {
-        select: { orderItems: true }
+        select: {
+          orderStatus: true,
+          paymentMethod: true,
+          stockReserved: true
+        }
       }
     }
   });
 
   if (!existingPayment) {
-    return {
-      ok: true,
-      ignored: true,
-      reason: "Payment not found"
-    };
+    return ignored("Payment not found");
+  }
+
+  if (existingPayment.order.paymentMethod !== "ONLINE") {
+    return ignored("Order is not an online payment order");
+  }
+
+  if (existingPayment.transactionId && existingPayment.transactionId !== payment.id) {
+    return ignored("Payment transaction mismatch");
+  }
+
+  if (Number.isInteger(orderIdFromMetadata) && orderIdFromMetadata !== existingPayment.orderId) {
+    return ignored("Payment order metadata mismatch");
+  }
+
+  if (payment.amount.currency !== "RUB") {
+    return ignored("Payment currency mismatch");
+  }
+
+  const actualAmount = new Prisma.Decimal(payment.amount.value);
+  const expectedAmount = new Prisma.Decimal(existingPayment.amount);
+
+  if (!expectedAmount.equals(actualAmount)) {
+    return ignored("Payment amount mismatch");
   }
 
   if (payment.status === "succeeded" && payment.paid) {
@@ -77,39 +109,64 @@ export default defineEventHandler(async (event) => {
       return { ok: true, alreadyProcessed: true };
     }
 
+    let processed = false;
+
     await prisma.$transaction(async (tx) => {
-      await tx.payment.update({
-        where: { id: existingPayment.id },
+      const updatedPayment = await tx.payment.updateMany({
+        where: {
+          id: existingPayment.id,
+          paymentStatus: PaymentStatus.PENDING,
+          order: {
+            is: {
+              orderStatus: { not: OrderStatus.CANCELLED }
+            }
+          }
+        },
         data: {
           transactionId: payment.id,
           paymentStatus: PaymentStatus.PAID,
           paidAt: new Date(),
-          amount: new Prisma.Decimal(payment.amount.value)
+          amount: actualAmount
         }
       });
 
-      await tx.order.update({
+      if (updatedPayment.count !== 1) {
+        return;
+      }
+
+      const order = await tx.order.findUnique({
         where: { id: existingPayment.orderId },
-        data: { orderStatus: OrderStatus.CONFIRMED }
+        select: {
+          orderStatus: true,
+          stockReserved: true
+        }
       });
 
-      const orderItems = await tx.orderItem.findMany({
-        where: { orderId: existingPayment.orderId },
-        select: { productId: true, quantity: true }
-      });
-
-      for (const item of orderItems) {
-        await tx.productStock.updateMany({
-          where: {
-            productId: item.productId,
-            quantity: { gte: item.quantity }
-          },
-          data: {
-            quantity: { decrement: item.quantity }
-          }
+      if (!order || order.orderStatus === OrderStatus.CANCELLED) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: "Order is not available for payment confirmation"
         });
       }
+
+      if (!order.stockReserved) {
+        await reserveOrderStock(tx, existingPayment.orderId);
+      }
+
+      await tx.order.update({
+        where: { id: existingPayment.orderId },
+        data: {
+          orderStatus: OrderStatus.CONFIRMED,
+          stockReserved: true
+        }
+      });
+
+      processed = true;
     });
+
+    if (!processed) {
+      return ignored("Payment is not pending or order is cancelled");
+    }
 
     return { ok: true };
   }
@@ -119,19 +176,51 @@ export default defineEventHandler(async (event) => {
       return { ok: true, alreadyProcessed: true };
     }
 
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: existingPayment.id },
+    let processed = false;
+
+    await prisma.$transaction(async (tx) => {
+      const updatedPayment = await tx.payment.updateMany({
+        where: {
+          id: existingPayment.id,
+          paymentStatus: PaymentStatus.PENDING
+        },
         data: {
           transactionId: payment.id,
-          paymentStatus: PaymentStatus.CANCELLED
+          paymentStatus: PaymentStatus.CANCELLED,
+          paidAt: null
         }
-      }),
-      prisma.order.update({
+      });
+
+      if (updatedPayment.count !== 1) {
+        return;
+      }
+
+      const order = await tx.order.findUnique({
         where: { id: existingPayment.orderId },
-        data: { orderStatus: OrderStatus.CANCELLED }
-      })
-    ]);
+        select: {
+          orderStatus: true,
+          stockReserved: true
+        }
+      });
+
+      if (order?.orderStatus !== OrderStatus.CANCELLED && order?.stockReserved) {
+        await restoreOrderStock(tx, existingPayment.orderId);
+      }
+
+      await tx.order.update({
+        where: { id: existingPayment.orderId },
+        data: {
+          orderStatus: OrderStatus.CANCELLED,
+          stockReserved: false
+        }
+      });
+
+      processed = true;
+    });
+
+    if (!processed) {
+      return ignored("Payment is not pending");
+    }
 
     return { ok: true };
   }
