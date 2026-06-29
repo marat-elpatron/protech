@@ -1,45 +1,30 @@
 <script setup lang="ts">
-import { Badge } from "@/components/ui/badge";
-import { getOrderStatusLabel, getPaymentStatusLabel } from "@/utils/adminStatus";
+import { getOrderStatusLabel, getPaymentStatusLabel, getStatusTone } from "@/utils/adminFormat";
 
-const props = defineProps<{
-  status: string;
-  type?: "order" | "payment" | "default";
-}>();
+const props = withDefaults(
+  defineProps<{
+    status: string | boolean | null | undefined;
+    type?: "order" | "payment" | "activity" | "answer" | "plain";
+  }>(),
+  { type: "plain" },
+);
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
-type StatusConfig = { label: string; variant: BadgeVariant };
+const normalized = computed(() => String(props.status ?? ""));
+const label = computed(() => {
+  if (props.type === "order") return getOrderStatusLabel(normalized.value);
+  if (props.type === "payment") return getPaymentStatusLabel(normalized.value);
+  if (props.type === "activity") return props.status ? "Активен" : "Скрыт";
+  if (props.type === "answer") return props.status ? "Отвечено" : "Ждет ответа";
+  return normalized.value || "—";
+});
 
-const config = computed<StatusConfig>(() => {
-  const orderMap: Record<string, BadgeVariant> = {
-    NEW: "secondary",
-    CONFIRMED: "default",
-    PROCESSING: "default",
-    SHIPPED: "default",
-    COMPLETED: "outline",
-    CANCELLED: "destructive",
-  };
-
-  const paymentMap: Record<string, BadgeVariant> = {
-    PENDING: "secondary",
-    UPON_RECEIPT: "outline",
-    PAID: "default",
-    CANCELLED: "destructive",
-  };
-
-  const map = props.type === "payment" ? paymentMap : orderMap;
-  const label =
-    props.type === "payment"
-      ? getPaymentStatusLabel(props.status)
-      : getOrderStatusLabel(props.status);
-
-  return {
-    label,
-    variant: map[props.status] ?? "secondary",
-  };
+const tone = computed(() => {
+  if (props.type === "activity") return props.status ? "green" : "gray";
+  if (props.type === "answer") return props.status ? "green" : "amber";
+  return getStatusTone(normalized.value);
 });
 </script>
 
 <template>
-  <Badge :variant="config.variant">{{ config.label }}</Badge>
+  <span class="badge" :class="`badge-${tone}`">{{ label }}</span>
 </template>

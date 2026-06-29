@@ -1,220 +1,170 @@
 <script setup lang="ts">
+import { Edit3, Plus, Trash2 } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import { Plus, Search, Pencil, Trash2, Package } from "@lucide/vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatPrice } from "@/utils/adminFormat";
+import type { CategoryItem, ProductListItem } from "@/composables/useAdminApi";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
 const api = useAdminApi();
-
 const search = ref("");
-const statusFilter = ref<string>("all");
+const categoryId = ref("all");
+const isActive = ref("all");
 const page = ref(1);
-const deleteId = ref<number | null>(null);
-const deleting = ref(false);
 
-const { data: categories } = await useAsyncData("categories", () => api.getCategories());
+const activityOptions = [
+  { value: "all", label: "Все статусы" },
+  { value: "true", label: "Активные" },
+  { value: "false", label: "Скрытые" },
+];
 
-const { data, pending, refresh } = await useAsyncData(
-  "admin-products",
-  () =>
-    api.getProducts({
-      page: page.value,
-      search: search.value || undefined,
-      isActive: statusFilter.value === "all" ? undefined : statusFilter.value === "active",
-    }),
-  { watch: [page, search, statusFilter] },
-);
+const productQuery = computed(() => ({
+  page: page.value,
+  search: search.value,
+  categoryId: categoryId.value === "all" ? undefined : Number(categoryId.value),
+  isActive: isActive.value === "all" ? undefined : isActive.value,
+}));
 
-let searchTimeout: ReturnType<typeof setTimeout>;
-function onSearchInput(value: string) {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    search.value = value;
-    page.value = 1;
-  }, 300);
+watch([search, categoryId, isActive], () => {
+  page.value = 1;
+});
+
+const { data: categories } = await useAsyncData("admin-products-categories", () => api.getCategories(), {
+  default: () => [] as CategoryItem[],
+});
+const categoryOptions = computed(() => [
+  { value: "all", label: "Все категории" },
+  ...categories.value.map((category) => ({
+    value: String(category.id),
+    label: category.name,
+  })),
+]);
+
+const {
+  data: products,
+  pending,
+  refresh,
+} = await useAsyncData("admin-products", () => api.getProducts(productQuery.value), {
+  watch: [productQuery],
+});
+
+function stockOf(product: ProductListItem) {
+  return product.productStocks[0]?.quantity ?? 0;
 }
 
-function formatPrice(value: number | string) {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
-  }).format(Number(value));
-}
+async function deleteProduct(product: ProductListItem) {
+  if (!confirm(`Удалить товар "${product.name}"?`)) return;
 
-async function confirmDelete() {
-  if (!deleteId.value) return;
-  deleting.value = true;
   try {
-    await api.deleteProduct(deleteId.value);
-    toast.success("Товар удалён");
-    deleteId.value = null;
+    await api.deleteProduct(product.id);
     await refresh();
-  } catch {
-    toast.error("Не удалось удалить товар");
-  } finally {
-    deleting.value = false;
+    toast.success("Товар удален");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось удалить товар");
   }
 }
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Товары" description="Управление каталогом продукции"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Товары' }]">
+    <AdminHeader
+      kicker="Catalog"
+      title="Товары"
+      description="Управление каталогом, ценами, изображениями и характеристиками"
+    >
       <template #actions>
-        <Button as-child>
-          <NuxtLink to="/admin/products/new">
-            <Plus class="size-4" />
-            Добавить товар
-          </NuxtLink>
-        </Button>
+        <NuxtLink class="btn btn-primary" to="/admin/products/new">
+          <Plus />
+          Новый товар
+        </NuxtLink>
       </template>
     </AdminHeader>
 
-    <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
-      <div class="flex flex-col gap-3 sm:flex-row">
-        <div class="relative flex-1">
-          <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input class="pl-9" placeholder="Поиск по названию или артикулу..."
-            @input="onSearchInput(($event.target as HTMLInputElement).value)" />
+    <div class="admin-content stack-lg">
+      <section class="panel">
+        <div class="panel-body toolbar">
+          <div class="filters">
+            <AdminSearchInput v-model="search" placeholder="Поиск по названию или артикулу" />
+            <div style="width: 240px">
+              <AdminSelect v-model="categoryId" :options="categoryOptions" placeholder="Категория" />
+            </div>
+            <div style="width: 190px">
+              <AdminSelect v-model="isActive" :options="activityOptions" placeholder="Статус" />
+            </div>
+          </div>
         </div>
-        <Select v-model="statusFilter">
-          <SelectTrigger class="w-full sm:w-44">
-            <SelectValue placeholder="Статус" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все</SelectItem>
-            <SelectItem value="active">Активные</SelectItem>
-            <SelectItem value="inactive">Неактивные</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      </section>
 
-      <Card class="admin-card">
-        <CardContent class="p-0">
-          <div v-if="pending" class="space-y-3 p-4">
-            <Skeleton v-for="i in 5" :key="i" class="h-12 w-full" />
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Каталог</h2>
+            <p class="panel-description">
+              {{ products?.pagination.total ?? 0 }} товаров найдено
+            </p>
           </div>
-
-          <Table v-else-if="data?.items.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead class="w-16">Фото</TableHead>
-                <TableHead>Название</TableHead>
-                <TableHead>Артикул</TableHead>
-                <TableHead>Категория</TableHead>
-                <TableHead>Цена</TableHead>
-                <TableHead>Остаток</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead class="w-24" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="product in data.items" :key="product.id">
-                <TableCell>
-                  <div class="size-11 overflow-hidden rounded-lg ring-1 ring-border/60">
-                    <img :src="product.mainImage" :alt="product.name" class="size-full object-cover" />
-                  </div>
-                </TableCell>
-                <TableCell class="font-medium">{{ product.name }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ product.article }}</TableCell>
-                <TableCell>{{ product.category.name }}</TableCell>
-                <TableCell>{{ formatPrice(product.currentPrice) }}</TableCell>
-                <TableCell>
-                  <span :class="(product.productStocks[0]?.quantity ?? 0) <= 5 ? 'font-medium text-destructive' : ''">
-                    {{ product.productStocks[0]?.quantity ?? 0 }}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Badge :variant="product.isActive ? 'default' : 'secondary'">
-                    {{ product.isActive ? "Активен" : "Скрыт" }}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div class="flex gap-1">
-                    <Button variant="ghost" size="icon" as-child>
-                      <NuxtLink :to="`/admin/products/${product.id}`">
-                        <Pencil class="size-4" />
+        </div>
+        <div class="panel-body">
+          <div v-if="pending" class="empty-state">Загружаю товары...</div>
+          <div v-else-if="products?.items.length" class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Товар</th>
+                  <th>Категория</th>
+                  <th>Цена</th>
+                  <th>Остаток</th>
+                  <th>Статус</th>
+                  <th>Заказы</th>
+                  <th style="width: 170px">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="product in products.items" :key="product.id">
+                  <td>
+                    <div class="entity-cell">
+                      <img class="thumb" :src="product.mainImage" :alt="product.name" />
+                      <div>
+                        <p class="entity-title">{{ product.name }}</p>
+                        <p class="entity-meta">{{ product.article }} · {{ product._count.reviews }} отзывов</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ product.category.name }}</td>
+                  <td>
+                    <strong>{{ formatPrice(product.currentPrice) }}</strong>
+                    <div v-if="product.oldPrice" class="entity-meta">было {{ formatPrice(product.oldPrice) }}</div>
+                  </td>
+                  <td>
+                    <span class="badge" :class="stockOf(product) <= 5 ? 'badge-amber' : 'badge-green'">
+                      {{ stockOf(product) }} шт.
+                    </span>
+                  </td>
+                  <td><AdminStatusBadge :status="product.isActive" type="activity" /></td>
+                  <td>{{ product._count.orderItems }}</td>
+                  <td>
+                    <div class="toolbar" style="justify-content: flex-start">
+                      <NuxtLink class="btn btn-secondary btn-icon" :to="`/admin/products/${product.id}`" title="Редактировать">
+                        <Edit3 />
                       </NuxtLink>
-                    </Button>
-                    <Button variant="ghost" size="icon" @click="deleteId = product.id">
-                      <Trash2 class="size-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-
-          <div v-else class="flex flex-col items-center gap-3 py-16 text-center">
-            <Package class="size-12 text-muted-foreground/40" />
-            <p class="text-muted-foreground">Товары не найдены</p>
-            <Button as-child variant="outline">
-              <NuxtLink to="/admin/products/new">Добавить первый товар</NuxtLink>
-            </Button>
+                      <button class="btn btn-danger btn-icon" type="button" title="Удалить" @click="deleteProduct(product)">
+                        <Trash2 />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </CardContent>
-      </Card>
+          <div v-else class="empty-state">Товары не найдены</div>
 
-      <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
-        <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">
-          Назад
-        </Button>
-        <span class="flex items-center px-3 text-sm text-muted-foreground">
-          {{ page }} / {{ data.pagination.pages }}
-        </span>
-        <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">
-          Далее
-        </Button>
-      </div>
+          <div v-if="products?.pagination.pages && products.pagination.pages > 1" class="pagination">
+            <button class="btn btn-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
+            <span class="muted">Страница {{ products.pagination.page }} из {{ products.pagination.pages }}</span>
+            <button class="btn btn-secondary" type="button" :disabled="page >= products.pagination.pages" @click="page++">Вперед</button>
+          </div>
+        </div>
+      </section>
     </div>
-
-    <AlertDialog :open="!!deleteId" @update:open="deleteId = null">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Удалить товар?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Это действие необратимо. Товар будет удалён из каталога.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            @click="confirmDelete">
-            {{ deleting ? "Удаление..." : "Удалить" }}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   </div>
 </template>

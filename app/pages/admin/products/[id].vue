@@ -1,185 +1,152 @@
 <script setup lang="ts">
+import { Banknote, Clock3, Plus } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import { History, Plus } from "@lucide/vue";
-import AdminProductForm from "@/components/admin/AdminProductForm.vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { formatDate, formatPrice } from "@/utils/adminFormat";
+import type { AttributeItem, CategoryItem } from "@/composables/useAdminApi";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
 const route = useRoute();
 const api = useAdminApi();
 const productId = computed(() => Number(route.params.id));
-
-const loading = ref(false);
-const priceDialog = ref(false);
-const newPrice = ref(0);
-const priceLoading = ref(false);
+const saving = ref(false);
+const addingPrice = ref(false);
+const newPrice = ref<number | null>(null);
 
 const {
   data: product,
-  error: productError,
   pending: productPending,
   refresh: refreshProduct,
-} = await useAsyncData(
-  () => `admin-product-${productId.value}`,
-  () => api.getProduct(productId.value),
-  { watch: [productId] },
-);
+} = await useAsyncData(`admin-product-${productId.value}`, () => api.getProduct(productId.value));
 
-const { data: categories } = await useAsyncData("admin-categories", () => api.getCategories());
-const { data: attributes } = await useAsyncData("admin-attributes", () => api.getAttributes());
+const { data: categories } = await useAsyncData("admin-edit-product-categories", () => api.getCategories(), {
+  default: () => [] as CategoryItem[],
+});
+const { data: attributes } = await useAsyncData("admin-edit-product-attributes", () => api.getAttributes(), {
+  default: () => [] as AttributeItem[],
+});
 
-const {
-  data: prices,
-  refresh: refreshPrices,
-} = await useAsyncData(
-  () => `admin-prices-${productId.value}`,
-  () => api.getPrices(productId.value),
-  { watch: [productId] },
-);
-
-async function handleSubmit(data: Record<string, unknown>) {
-  loading.value = true;
+async function submit(payload: Record<string, unknown>) {
+  saving.value = true;
   try {
-    await api.updateProduct(productId.value, data);
-    toast.success("Товар обновлён");
+    await api.updateProduct(productId.value, payload);
     await refreshProduct();
-  } catch {
-    toast.error("Не удалось обновить товар");
+    toast.success("Товар сохранен");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось сохранить товар");
   } finally {
-    loading.value = false;
+    saving.value = false;
   }
 }
 
-async function handleAddPrice() {
-  if (newPrice.value <= 0) {
-    toast.error("Укажите корректную цену");
+async function addPrice() {
+  const value = Number(newPrice.value);
+  if (!value || value <= 0) {
+    toast.error("Введите корректную цену");
     return;
   }
-  priceLoading.value = true;
+
+  addingPrice.value = true;
   try {
-    await api.addPrice(productId.value, newPrice.value);
-    toast.success("Цена обновлена");
-    priceDialog.value = false;
-    newPrice.value = 0;
-    await Promise.all([refreshProduct(), refreshPrices()]);
-  } catch {
-    toast.error("Не удалось обновить цену");
+    await api.addPrice(productId.value, value);
+    newPrice.value = null;
+    await refreshProduct();
+    toast.success("Новая цена добавлена");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось добавить цену");
   } finally {
-    priceLoading.value = false;
+    addingPrice.value = false;
   }
-}
-
-function formatPrice(value: number | string) {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
-  }).format(Number(value));
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
 }
 </script>
 
 <template>
   <div>
-    <AdminHeader :title="product?.name ?? 'Редактирование'" description="Изменение данных товара" :breadcrumbs="[
-      { label: 'Admin', href: '/admin' },
-      { label: 'Товары', href: '/admin/products' },
-      { label: product?.name ?? '...' },
-    ]" />
+    <AdminHeader
+      kicker="Catalog"
+      :title="product?.name || 'Редактирование товара'"
+      :description="product ? `Артикул ${product.article}` : 'Загрузка карточки товара'"
+    >
+      <template #actions>
+        <NuxtLink class="btn btn-secondary" to="/admin/products">К списку</NuxtLink>
+      </template>
+    </AdminHeader>
 
-    <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <Alert v-if="productError" variant="destructive">
-        <AlertTitle>Не удалось загрузить товар</AlertTitle>
-        <AlertDescription>
-          Проверьте, что товар существует, и обновите страницу.
-        </AlertDescription>
-      </Alert>
+    <div class="admin-content stack-lg">
+      <div v-if="productPending" class="empty-state">Загружаю товар...</div>
 
-      <div v-if="productPending" class="space-y-4">
-        <Skeleton class="h-64 rounded-xl" />
-        <Skeleton class="h-64 rounded-xl" />
-      </div>
+      <template v-else-if="product">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Управление ценой</h2>
+              <p class="panel-description">Новая цена автоматически станет текущей и попадет в историю</p>
+            </div>
+            <Banknote style="color: var(--admin-primary)" />
+          </div>
+          <div class="panel-body stack">
+            <div class="mini-stat-grid">
+              <div class="mini-stat">
+                <p class="mini-stat-label">Текущая цена</p>
+                <p class="mini-stat-value">{{ formatPrice(product.currentPrice) }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Предыдущая цена</p>
+                <p class="mini-stat-value">{{ product.oldPrice ? formatPrice(product.oldPrice) : "—" }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Остаток</p>
+                <p class="mini-stat-value">{{ product.productStocks[0]?.quantity ?? 0 }} шт.</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Обновлен</p>
+                <p class="mini-stat-value" style="font-size: 15px">{{ formatDate(product.updatedAt) }}</p>
+              </div>
+            </div>
 
-      <AdminProductForm v-else-if="product" :initial="product" :categories="categories ?? []"
-        :attribute-items="attributes ?? []" :loading="loading" @submit="handleSubmit" />
+            <form class="toolbar" @submit.prevent="addPrice">
+              <div class="field" style="width: min(360px, 100%)">
+                <label for="new-price">Новая цена</label>
+                <input id="new-price" v-model.number="newPrice" class="input" min="0" step="0.01" type="number" placeholder="99000" />
+              </div>
+              <button class="btn btn-primary" type="submit" :disabled="addingPrice">
+                <Plus />
+                {{ addingPrice ? "Добавление..." : "Добавить цену" }}
+              </button>
+            </form>
 
-      <Card>
-        <CardHeader class="flex flex-row items-center justify-between">
-          <CardTitle class="flex items-center gap-2 text-base">
-            <History class="size-4" />
-            История цен
-          </CardTitle>
-          <Button size="sm" :disabled="!product" @click="priceDialog = true">
-            <Plus class="size-4" />
-            Новая цена
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <Table v-if="prices?.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Цена</TableHead>
-                <TableHead>Дата</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="price in prices" :key="price.id">
-                <TableCell class="font-medium">{{ formatPrice(price.value) }}</TableCell>
-                <TableCell class="text-muted-foreground">{{ formatDate(price.createdAt) }}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p v-else class="text-sm text-muted-foreground">История цен пуста</p>
-        </CardContent>
-      </Card>
+            <div v-if="product.productPrices?.length" class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Цена</th>
+                    <th>Дата</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="price in product.productPrices" :key="price.id">
+                    <td><strong>{{ formatPrice(price.value) }}</strong></td>
+                    <td>
+                      <Clock3 style="display: inline; width: 15px; height: 15px; margin-right: 6px; vertical-align: -2px; color: var(--admin-muted)" />
+                      {{ formatDate(price.createdAt) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <AdminProductForm
+          :attributes="attributes"
+          :categories="categories"
+          :initial="product"
+          :loading="saving"
+          @submit="submit"
+        />
+      </template>
+
+      <div v-else class="empty-state">Товар не найден</div>
     </div>
-
-    <Dialog v-model:open="priceDialog">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Установить новую цену</DialogTitle>
-        </DialogHeader>
-        <div class="space-y-2 py-2">
-          <Label for="newPrice">Новая цена (₽)</Label>
-          <Input id="newPrice" v-model.number="newPrice" type="number" min="0" step="0.01" />
-          <p class="text-xs text-muted-foreground">Текущая цена станет «старой»</p>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" @click="priceDialog = false">Отмена</Button>
-          <Button :disabled="priceLoading" @click="handleAddPrice">
-            {{ priceLoading ? "Сохранение..." : "Сохранить" }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>

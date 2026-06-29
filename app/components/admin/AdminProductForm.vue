@@ -1,117 +1,125 @@
 <script setup lang="ts">
+import { Plus, Save, Trash2 } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import {
-  Plus,
-  Trash2,
-  Package,
-  Banknote,
-  ImageIcon,
-  ListChecks,
-  Sparkles,
-  Loader2,
-} from "@lucide/vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import AdminImageUpload from "@/components/admin/AdminImageUpload.vue";
-import AdminImageGallery from "@/components/admin/AdminImageGallery.vue";
-import type { CategoryItem, ProductDetail } from "@/composables/useAdminApi";
-import {
-  buildProductFormState,
-  productFormToPayload,
-  type ProductFormState,
-} from "@/utils/productForm";
+import type { AttributeItem, CategoryItem, ProductDetail } from "@/composables/useAdminApi";
 
-const props = defineProps<{
-  categories: CategoryItem[];
-  attributeItems: { id: number; name: string; unit: string }[];
-  initial?: ProductDetail | null;
-  loading?: boolean;
-}>();
+type ProductFormState = {
+  name: string;
+  description: string;
+  currentPrice: number;
+  oldPrice: number | null;
+  article: string;
+  mainImage: string;
+  ozonLink: string;
+  categoryId: number;
+  isActive: boolean;
+  productImages: { url: string }[];
+  productAttributes: { attributeId: number; value: string }[];
+};
+
+const props = withDefaults(
+  defineProps<{
+    categories: CategoryItem[];
+    attributes: AttributeItem[];
+    initial?: ProductDetail | null;
+    loading?: boolean;
+  }>(),
+  {
+    initial: null,
+    loading: false,
+  },
+);
 
 const emit = defineEmits<{
-  submit: [data: Record<string, unknown>];
+  submit: [payload: Record<string, unknown>];
 }>();
 
-const router = useRouter();
 const api = useAdminApi();
-const localCategories = ref<CategoryItem[]>([...props.categories]);
-const localAttributeItems = ref([...props.attributeItems]);
-const categoryDialog = ref(false);
-const attributeDialog = ref(false);
-const categorySaving = ref(false);
-const attributeSaving = ref(false);
+const router = useRouter();
+const localCategories = ref<CategoryItem[]>([]);
+const localAttributes = ref<AttributeItem[]>([]);
+const creatingCategory = ref(false);
+const creatingAttribute = ref(false);
 const newCategoryName = ref("");
-const newAttribute = reactive({
-  name: "",
-  unit: "",
-});
+const newAttributeName = ref("");
+const newAttributeUnit = ref("");
 
-const form = reactive<ProductFormState>(
-  buildProductFormState(props.initial, props.categories),
+const form = reactive<ProductFormState>(buildState(props.initial));
+const categoryModel = computed({
+  get: () => (form.categoryId ? String(form.categoryId) : ""),
+  set: (value: string) => {
+    form.categoryId = Number(value);
+  },
+});
+const categoryOptions = computed(() =>
+  localCategories.value.map((category) => ({
+    value: String(category.id),
+    label: category.name,
+  })),
+);
+const attributeOptions = computed(() =>
+  localAttributes.value.map((attribute) => ({
+    value: String(attribute.id),
+    label: attribute.name,
+    description: attribute.unit || undefined,
+  })),
 );
 
 watch(
   () => props.categories,
   (categories) => {
     localCategories.value = [...categories];
+    if (!form.categoryId && categories[0]) {
+      form.categoryId = categories[0].id;
+    }
   },
-  { deep: true },
+  { immediate: true, deep: true },
 );
 
 watch(
-  () => props.attributeItems,
+  () => props.attributes,
   (attributes) => {
-    localAttributeItems.value = [...attributes];
+    localAttributes.value = [...attributes];
   },
-  { deep: true },
+  { immediate: true, deep: true },
 );
 
 watch(
-  () => [props.initial, props.categories] as const,
-  ([initial, categories]) => {
-    Object.assign(form, buildProductFormState(initial, categories));
+  () => props.initial,
+  (initial) => {
+    Object.assign(form, buildState(initial));
   },
   { deep: true },
 );
 
-function addAttribute() {
-  form.productAttributes.push({
-    attributeId: localAttributeItems.value[0]?.id ?? 0,
-    value: "",
-  });
-}
-
-function removeAttribute(index: number) {
-  form.productAttributes.splice(index, 1);
+function buildState(product?: ProductDetail | null): ProductFormState {
+  return {
+    name: product?.name ?? "",
+    description: product?.description ?? "",
+    currentPrice: Number(product?.currentPrice ?? 0),
+    oldPrice: product?.oldPrice ? Number(product.oldPrice) : null,
+    article: product?.article ?? "",
+    mainImage: product?.mainImage ?? "",
+    ozonLink: product?.ozonLink ?? "",
+    categoryId: product?.category?.id ?? props.categories[0]?.id ?? 0,
+    isActive: product?.isActive ?? true,
+    productImages: product?.productImages?.map((image) => ({ url: image.url })) ?? [],
+    productAttributes:
+      product?.productAttributes?.map((item) => ({
+        attributeId: item.attributeId,
+        value: item.value,
+      })) ?? [],
+  };
 }
 
 async function createCategory() {
   const name = newCategoryName.value.trim();
-
   if (!name) {
     toast.error("Укажите название категории");
     return;
   }
 
-  categorySaving.value = true;
+  creatingCategory.value = true;
   try {
     const { category } = await api.createCategory(name);
     localCategories.value = [...localCategories.value, category].sort((a, b) =>
@@ -119,48 +127,72 @@ async function createCategory() {
     );
     form.categoryId = category.id;
     newCategoryName.value = "";
-    categoryDialog.value = false;
     toast.success("Категория создана");
-  } catch {
-    toast.error("Не удалось создать категорию");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось создать категорию");
   } finally {
-    categorySaving.value = false;
+    creatingCategory.value = false;
   }
 }
 
 async function createAttribute() {
-  const name = newAttribute.name.trim();
-  const unit = newAttribute.unit.trim();
-
+  const name = newAttributeName.value.trim();
+  const unit = newAttributeUnit.value.trim();
   if (!name) {
-    toast.error("Укажите название характеристики");
+    toast.error("Укажите название атрибута");
     return;
   }
 
-  attributeSaving.value = true;
+  creatingAttribute.value = true;
   try {
     const { attribute } = await api.createAttribute({ name, unit });
-    const item = {
-      ...attribute,
-      _count: { productAttributes: 0 },
-    };
-
-    localAttributeItems.value = [...localAttributeItems.value, item].sort((a, b) =>
+    const created = { ...attribute, _count: { productAttributes: 0 } };
+    localAttributes.value = [...localAttributes.value, created].sort((a, b) =>
       a.name.localeCompare(b.name, "ru"),
     );
-    form.productAttributes.push({
-      attributeId: item.id,
-      value: "",
-    });
-    newAttribute.name = "";
-    newAttribute.unit = "";
-    attributeDialog.value = false;
-    toast.success("Характеристика создана");
-  } catch {
-    toast.error("Не удалось создать характеристику");
+    form.productAttributes.push({ attributeId: created.id, value: "" });
+    newAttributeName.value = "";
+    newAttributeUnit.value = "";
+    toast.success("Атрибут создан");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось создать атрибут");
   } finally {
-    attributeSaving.value = false;
+    creatingAttribute.value = false;
   }
+}
+
+function addGalleryImage() {
+  form.productImages.push({ url: "" });
+}
+
+function addAttributeRow() {
+  form.productAttributes.push({
+    attributeId: localAttributes.value[0]?.id ?? 0,
+    value: "",
+  });
+}
+
+function toPayload() {
+  const payload: Record<string, unknown> = {
+    name: form.name.trim(),
+    description: form.description.trim(),
+    currentPrice: Number(form.currentPrice),
+    article: form.article.trim(),
+    mainImage: form.mainImage.trim(),
+    categoryId: Number(form.categoryId),
+    isActive: form.isActive,
+    productImages: form.productImages
+      .map((image) => ({ url: image.url.trim() }))
+      .filter((image) => image.url),
+    productAttributes: form.productAttributes
+      .filter((item) => item.attributeId && item.value.trim())
+      .map((item) => ({ attributeId: Number(item.attributeId), value: item.value.trim() })),
+  };
+
+  if (form.oldPrice && Number(form.oldPrice) > 0) payload.oldPrice = Number(form.oldPrice);
+  if (form.ozonLink.trim()) payload.ozonLink = form.ozonLink.trim();
+
+  return payload;
 }
 
 function handleSubmit() {
@@ -170,317 +202,236 @@ function handleSubmit() {
   }
 
   if (!form.mainImage.trim()) {
-    toast.error("Загрузите главное изображение");
+    toast.error("Добавьте главное изображение товара");
     return;
   }
 
   if (!form.categoryId) {
-    toast.error("Выберите категорию");
+    toast.error("Выберите или создайте категорию");
     return;
   }
 
-  if (form.currentPrice <= 0) {
-    toast.error("Укажите корректную цену");
+  if (Number(form.currentPrice) <= 0) {
+    toast.error("Цена должна быть больше нуля");
     return;
   }
 
   const attributeIds = form.productAttributes
-    .filter((attribute) => attribute.attributeId > 0 && attribute.value.trim())
-    .map((attribute) => attribute.attributeId);
+    .filter((item) => item.attributeId && item.value.trim())
+    .map((item) => item.attributeId);
 
   if (new Set(attributeIds).size !== attributeIds.length) {
-    toast.error("Одна характеристика не может быть добавлена несколько раз");
+    toast.error("Атрибуты товара не должны повторяться");
     return;
   }
 
-  emit("submit", productFormToPayload(form));
+  emit("submit", toPayload());
 }
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="handleSubmit">
-    <div class="grid gap-6 xl:grid-cols-[1fr_380px]">
-      <div class="space-y-6">
-        <Card class="admin-card overflow-hidden">
-          <CardHeader class="border-b border-border/50 bg-muted/20 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Package class="size-4" />
+  <form class="stack-lg" @submit.prevent="handleSubmit">
+    <div class="two-col">
+      <div class="stack-lg">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Основная информация</h2>
+              <p class="panel-description">Название, описание, категория и статус публикации</p>
+            </div>
+          </div>
+          <div class="panel-body stack">
+            <div class="form-grid">
+              <div class="field" style="grid-column: 1 / -1">
+                <label for="product-name">Название</label>
+                <input id="product-name" v-model="form.name" class="input" placeholder="Например, iPhone 15 Pro" />
               </div>
-              <div>
-                <CardTitle class="text-base">Основная информация</CardTitle>
-                <CardDescription>Название, артикул и описание товара</CardDescription>
+              <div class="field">
+                <label for="product-article">Артикул</label>
+                <input id="product-article" v-model="form.article" class="input" placeholder="SKU-001" />
+              </div>
+              <div class="field">
+                <label for="product-category">Категория</label>
+                <AdminSelect
+                  v-model="categoryModel"
+                  :options="categoryOptions"
+                  placeholder="Выберите категорию"
+                  aria-label="Категория товара"
+                />
               </div>
             </div>
-          </CardHeader>
-          <CardContent class="space-y-4 pt-6">
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="space-y-2 sm:col-span-2">
-                <Label for="name">Название *</Label>
-                <Input id="name" v-model="form.name" placeholder="iPhone 15 Pro" required />
-              </div>
-              <div class="space-y-2">
-                <Label for="article">Артикул *</Label>
-                <Input id="article" v-model="form.article" placeholder="IP15P-256" required />
-              </div>
-              <div class="space-y-2">
-                <div class="flex items-center justify-between gap-2">
-                  <Label>Категория *</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="h-7 px-2 text-xs"
-                    @click="categoryDialog = true"
-                  >
-                    <Plus class="size-3.5" />
-                    Новая
-                  </Button>
-                </div>
-                <Select
-                  :model-value="form.categoryId ? String(form.categoryId) : undefined"
-                  :disabled="!localCategories.length"
-                  @update:model-value="form.categoryId = Number($event)"
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      :placeholder="localCategories.length ? 'Выберите категорию' : 'Создайте категорию'"
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="cat in localCategories" :key="cat.id" :value="String(cat.id)">
-                      {{ cat.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <Label for="description">Описание *</Label>
-              <Textarea id="description" v-model="form.description" rows="5" required />
-            </div>
-            <div
-              class="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 p-4"
-            >
-              <div>
-                <Label class="flex items-center gap-2">
-                  <Sparkles class="size-3.5 text-primary" />
-                  Активен в каталоге
-                </Label>
-                <p class="text-xs text-muted-foreground">Скрытые товары не видны покупателям</p>
-              </div>
-              <Switch v-model="form.isActive" />
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card class="admin-card overflow-hidden">
-          <CardHeader class="border-b border-border/50 bg-muted/20 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ListChecks class="size-4" />
+            <div class="field">
+              <label for="product-description">Описание</label>
+              <textarea id="product-description" v-model="form.description" class="textarea" rows="6" />
+            </div>
+
+            <div class="switch-row">
+              <div>
+                <div class="field-label">Показывать в каталоге</div>
+                <div class="muted" style="font-size: 13px">Неактивные товары остаются в админке, но скрыты от покупателей.</div>
               </div>
-              <div class="flex-1">
-                <CardTitle class="text-base">Характеристики</CardTitle>
-                <CardDescription>Технические параметры товара</CardDescription>
-              </div>
-              <Button
+              <button
+                class="toggle"
+                :class="{ active: form.isActive }"
                 type="button"
-                variant="outline"
-                size="sm"
-                :disabled="!localAttributeItems.length"
-                @click="addAttribute"
-              >
-                <Plus class="size-4" />
-                Добавить
-              </Button>
-              <Button type="button" variant="secondary" size="sm" @click="attributeDialog = true">
-                <Plus class="size-4" />
-                Новая
-              </Button>
+                :aria-pressed="form.isActive"
+                @click="form.isActive = !form.isActive"
+              />
             </div>
-          </CardHeader>
-          <CardContent class="space-y-3 pt-6">
-            <div
-              v-for="(attr, index) in form.productAttributes"
-              :key="index"
-              class="grid grid-cols-1 gap-2 rounded-xl border border-border/50 bg-muted/10 p-3 sm:grid-cols-[1fr_1fr_auto]"
-            >
-              <Select
-                :model-value="attr.attributeId ? String(attr.attributeId) : undefined"
-                @update:model-value="attr.attributeId = Number($event)"
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Характеристика" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="attribute in localAttributeItems"
-                    :key="attribute.id"
-                    :value="String(attribute.id)"
-                  >
-                    {{ attribute.name }}{{ attribute.unit ? ` (${attribute.unit})` : "" }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Input v-model="attr.value" placeholder="Значение" />
-              <Button type="button" variant="ghost" size="icon" @click="removeAttribute(index)">
-                <Trash2 class="size-4 text-destructive" />
-              </Button>
-            </div>
-            <p v-if="!form.productAttributes.length" class="py-4 text-center text-sm text-muted-foreground">
-              Характеристики не добавлены
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
-      <div class="space-y-6">
-        <Card class="admin-card overflow-hidden">
-          <CardHeader class="border-b border-border/50 bg-muted/20 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ImageIcon class="size-4" />
-              </div>
-              <div>
-                <CardTitle class="text-base">Главное фото *</CardTitle>
-                <CardDescription>Отображается в каталоге и карточке</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent class="pt-6">
-            <AdminImageUpload v-model="form.mainImage" :label="undefined" />
-          </CardContent>
-        </Card>
-
-        <Card class="admin-card overflow-hidden">
-          <CardHeader class="border-b border-border/50 bg-muted/20 pb-4">
-            <div class="flex items-center gap-3">
-              <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Banknote class="size-4" />
-              </div>
-              <div>
-                <CardTitle class="text-base">Цены и ссылки</CardTitle>
-                <CardDescription>Стоимость и внешние ссылки</CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent class="space-y-4 pt-6">
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-2">
-                <Label for="currentPrice">Цена *</Label>
-                <Input
-                  id="currentPrice"
-                  v-model.number="form.currentPrice"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-              <div class="space-y-2">
-                <Label for="oldPrice">Старая цена</Label>
-                <Input
-                  id="oldPrice"
-                  v-model.number="form.oldPrice"
-                  type="number"
-                  min="0"
-                  step="0.01"
+            <div class="panel panel-muted">
+              <div class="panel-body stack">
+                <div class="toolbar">
+                  <div>
+                    <h3 class="panel-title">Быстро создать категорию</h3>
+                    <p class="panel-description">Новая категория сразу привяжется к товару</p>
+                  </div>
+                  <button class="btn btn-soft" type="button" :disabled="creatingCategory" @click="createCategory">
+                    <Plus />
+                    {{ creatingCategory ? "Создание..." : "Создать" }}
+                  </button>
+                </div>
+                <input
+                  v-model="newCategoryName"
+                  class="input"
+                  placeholder="Название новой категории"
+                  @keydown.enter.prevent="createCategory"
                 />
               </div>
             </div>
-            <div class="space-y-2">
-              <Label for="ozonLink">Ссылка Ozon</Label>
-              <Input id="ozonLink" v-model="form.ozonLink" placeholder="https://ozon.ru/..." />
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Атрибуты товара</h2>
+              <p class="panel-description">Технические характеристики можно создать прямо здесь</p>
             </div>
-          </CardContent>
-        </Card>
+            <button class="btn btn-secondary" type="button" @click="addAttributeRow">
+              <Plus />
+              Добавить
+            </button>
+          </div>
+          <div class="panel-body stack">
+            <div class="panel panel-muted">
+              <div class="panel-body stack">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="new-attribute-name">Новый атрибут</label>
+                    <input id="new-attribute-name" v-model="newAttributeName" class="input" placeholder="Мощность" />
+                  </div>
+                  <div class="field">
+                    <label for="new-attribute-unit">Единица</label>
+                    <input id="new-attribute-unit" v-model="newAttributeUnit" class="input" placeholder="Вт, ГБ, мм" />
+                  </div>
+                </div>
+                <div>
+                  <button class="btn btn-soft" type="button" :disabled="creatingAttribute" @click="createAttribute">
+                    <Plus />
+                    {{ creatingAttribute ? "Создание..." : "Создать атрибут" }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="form.productAttributes.length" class="stack">
+              <div v-for="(item, index) in form.productAttributes" :key="index" class="attribute-row">
+                <AdminSelect
+                  :model-value="item.attributeId ? String(item.attributeId) : ''"
+                  :options="attributeOptions"
+                  placeholder="Атрибут"
+                  :aria-label="`Атрибут ${index + 1}`"
+                  @update:model-value="item.attributeId = Number($event)"
+                />
+                <input v-model="item.value" class="input" placeholder="Значение" />
+                <button class="btn btn-danger btn-icon" type="button" @click="form.productAttributes.splice(index, 1)">
+                  <Trash2 />
+                </button>
+              </div>
+            </div>
+            <div v-else class="empty-state">Характеристики пока не добавлены</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="stack-lg">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Главное фото</h2>
+              <p class="panel-description">Используется в каталоге и карточке товара</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <AdminImageUpload v-model="form.mainImage" label="" />
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Цена и маркетплейс</h2>
+              <p class="panel-description">Текущая цена, старая цена и ссылка на Ozon</p>
+            </div>
+          </div>
+          <div class="panel-body stack">
+            <div class="form-grid">
+              <div class="field">
+                <label for="current-price">Цена</label>
+                <input id="current-price" v-model.number="form.currentPrice" class="input" min="0" step="0.01" type="number" />
+              </div>
+              <div class="field">
+                <label for="old-price">Старая цена</label>
+                <input id="old-price" v-model.number="form.oldPrice" class="input" min="0" step="0.01" type="number" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="ozon-link">Ссылка Ozon</label>
+              <input id="ozon-link" v-model="form.ozonLink" class="input" placeholder="https://ozon.ru/..." />
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
-    <Card class="admin-card overflow-hidden">
-      <CardHeader class="border-b border-border/50 bg-muted/20 pb-4">
-        <div class="flex items-center gap-3">
-          <div class="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <ImageIcon class="size-4" />
-          </div>
-          <div>
-            <CardTitle class="text-base">Галерея изображений</CardTitle>
-            <CardDescription>Дополнительные фото для карточки товара</CardDescription>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Галерея</h2>
+          <p class="panel-description">Дополнительные изображения товара</p>
+        </div>
+        <button class="btn btn-secondary" type="button" @click="addGalleryImage">
+          <Plus />
+          Добавить фото
+        </button>
+      </div>
+      <div class="panel-body">
+        <div v-if="form.productImages.length" class="media-grid">
+          <div v-for="(image, index) in form.productImages" :key="index" class="media-card">
+            <AdminImageUpload
+              :model-value="image.url"
+              compact
+              label=""
+              @update:model-value="image.url = $event"
+            />
+            <button class="btn btn-danger" type="button" @click="form.productImages.splice(index, 1)">
+              <Trash2 />
+              Удалить
+            </button>
           </div>
         </div>
-      </CardHeader>
-      <CardContent class="pt-6">
-        <AdminImageGallery v-model="form.productImages" />
-      </CardContent>
-    </Card>
+        <div v-else class="empty-state">Дополнительные изображения пока не добавлены</div>
+      </div>
+    </section>
 
-    <div
-      class="sticky bottom-4 z-20 flex items-center justify-end gap-3 rounded-xl border border-border/60 bg-background/90 p-4 shadow-lg backdrop-blur-md"
-    >
-      <Button type="button" variant="outline" @click="router.back()">Отмена</Button>
-      <Button type="submit" :disabled="loading" class="min-w-36 shadow-md shadow-primary/20">
-        {{ loading ? "Сохранение..." : initial ? "Сохранить изменения" : "Создать товар" }}
-      </Button>
+    <div class="sticky-actions">
+      <button class="btn btn-secondary" type="button" @click="router.back()">Отмена</button>
+      <button class="btn btn-primary" type="submit" :disabled="loading">
+        <Save />
+        {{ loading ? "Сохранение..." : initial ? "Сохранить товар" : "Создать товар" }}
+      </button>
     </div>
-
-    <Dialog v-model:open="categoryDialog">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Новая категория</DialogTitle>
-        </DialogHeader>
-        <div class="space-y-2 py-2">
-          <Label for="newCategoryName">Название</Label>
-          <Input
-            id="newCategoryName"
-            v-model="newCategoryName"
-            placeholder="Смартфоны"
-            @keydown.enter.prevent="createCategory"
-          />
-        </div>
-        <DialogFooter>
-          <Button variant="outline" type="button" @click="categoryDialog = false">Отмена</Button>
-          <Button type="button" :disabled="categorySaving" @click="createCategory">
-            <Loader2 v-if="categorySaving" class="size-4 animate-spin" />
-            {{ categorySaving ? "Создание..." : "Создать" }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <Dialog v-model:open="attributeDialog">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Новая характеристика</DialogTitle>
-        </DialogHeader>
-        <div class="grid gap-4 py-2 sm:grid-cols-2">
-          <div class="space-y-2">
-            <Label for="newAttributeName">Название</Label>
-            <Input
-              id="newAttributeName"
-              v-model="newAttribute.name"
-              placeholder="Объём памяти"
-              @keydown.enter.prevent="createAttribute"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="newAttributeUnit">Единица</Label>
-            <Input
-              id="newAttributeUnit"
-              v-model="newAttribute.unit"
-              placeholder="ГБ, мм, Вт"
-              @keydown.enter.prevent="createAttribute"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" type="button" @click="attributeDialog = false">Отмена</Button>
-          <Button type="button" :disabled="attributeSaving" @click="createAttribute">
-            <Loader2 v-if="attributeSaving" class="size-4 animate-spin" />
-            {{ attributeSaving ? "Создание..." : "Создать" }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   </form>
 </template>

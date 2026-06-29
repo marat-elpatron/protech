@@ -1,33 +1,16 @@
 <script setup lang="ts">
 import {
-  Package,
-  ShoppingCart,
-  MessageSquare,
-  HelpCircle,
-  TrendingUp,
   AlertTriangle,
   BarChart3,
+  HelpCircle,
   LineChart,
+  MessageSquare,
+  Package,
   PackageSearch,
+  ShoppingCart,
+  TrendingUp,
 } from "@lucide/vue";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate, formatPrice, formatShortDate } from "@/utils/adminFormat";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
@@ -38,420 +21,333 @@ const customEnd = ref("");
 const selectedProductId = ref("all");
 const sortBy = ref<"quantity" | "revenue" | "orders">("quantity");
 
+const periodOptions = [
+  { value: "7", label: "7 дней" },
+  { value: "30", label: "30 дней" },
+  { value: "90", label: "90 дней" },
+  { value: "custom", label: "Свой период" },
+];
+
+const sortOptions = [
+  { value: "quantity", label: "По количеству" },
+  { value: "revenue", label: "По выручке" },
+  { value: "orders", label: "По заказам" },
+];
+
 const dashboardQuery = computed(() => ({
   period: period.value,
   sortBy: sortBy.value,
   productId: selectedProductId.value === "all" ? undefined : Number(selectedProductId.value),
-  startDate: period.value === "custom" ? customStart.value || undefined : undefined,
-  endDate: period.value === "custom" ? customEnd.value || undefined : undefined,
+  startDate: period.value === "custom" ? customStart.value : undefined,
+  endDate: period.value === "custom" ? customEnd.value : undefined,
 }));
 
 const { data, pending } = await useAsyncData(
-  "dashboard",
+  "admin-dashboard",
   () => api.getDashboard(dashboardQuery.value),
-  { watch: [period, customStart, customEnd, selectedProductId, sortBy] },
+  { watch: [dashboardQuery] },
 );
 
-const chartWidth = 720;
-const chartHeight = 220;
-const chartPadding = 28;
+const chartWidth = 760;
+const chartHeight = 240;
+const chartPadding = 30;
 
 const salesByDay = computed(() => data.value?.analytics.salesByDay ?? []);
-const maxQuantity = computed(() => Math.max(...salesByDay.value.map((item) => item.quantity), 1));
-const maxRevenue = computed(() => Math.max(...salesByDay.value.map((item) => Number(item.revenue)), 1));
-const barChartItems = computed(() => {
-  const innerWidth = chartWidth - chartPadding * 2;
-  const innerHeight = chartHeight - chartPadding * 2;
-  const count = Math.max(salesByDay.value.length, 1);
-  const slotWidth = innerWidth / count;
-
-  return salesByDay.value.map((item, index) => {
-    const height = (item.quantity / maxQuantity.value) * innerHeight;
-
-    return {
-      ...item,
-      x: chartPadding + index * slotWidth + slotWidth * 0.15,
-      y: chartHeight - chartPadding - height,
-      width: Math.max(slotWidth * 0.7, 2),
-      height,
-      showLabel: index === 0 || index === salesByDay.value.length - 1 || index % Math.ceil(count / 6) === 0,
-    };
-  });
-});
-const revenueLinePoints = computed(() => {
-  const innerWidth = chartWidth - chartPadding * 2;
-  const innerHeight = chartHeight - chartPadding * 2;
-  const count = Math.max(salesByDay.value.length - 1, 1);
-
-  return salesByDay.value
-    .map((item, index) => {
-      const x = chartPadding + (index / count) * innerWidth;
-      const y = chartHeight - chartPadding - (Number(item.revenue) / maxRevenue.value) * innerHeight;
-      return `${x},${y}`;
-    })
-    .join(" ");
-});
+const maxQuantity = computed(() => Math.max(1, ...salesByDay.value.map((item) => item.quantity)));
+const maxRevenue = computed(() => Math.max(1, ...salesByDay.value.map((item) => Number(item.revenue))));
 const selectedProductName = computed(() => {
   if (selectedProductId.value === "all") return "Все товары";
-
   return (
     data.value?.analytics.productOptions.find((item) => String(item.id) === selectedProductId.value)?.name ??
     "Выбранный товар"
   );
 });
+const productOptions = computed(() => [
+  { value: "all", label: "Все товары" },
+  ...(data.value?.analytics.productOptions.map((product) => ({
+    value: String(product.id),
+    label: product.name,
+    description: product.article,
+  })) ?? []),
+]);
 
-function formatPrice(value: number | string) {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "RUB",
-    maximumFractionDigits: 0,
-  }).format(Number(value));
-}
+const bars = computed(() => {
+  const innerWidth = chartWidth - chartPadding * 2;
+  const innerHeight = chartHeight - chartPadding * 2;
+  const count = Math.max(salesByDay.value.length, 1);
+  const slot = innerWidth / count;
+  const labelEvery = Math.max(1, Math.ceil(count / 6));
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
+  return salesByDay.value.map((item, index) => {
+    const height = Math.max(2, (item.quantity / maxQuantity.value) * innerHeight);
+    return {
+      ...item,
+      x: chartPadding + index * slot + slot * 0.18,
+      y: chartHeight - chartPadding - height,
+      width: Math.max(slot * 0.64, 3),
+      height,
+      showLabel: index === 0 || index === count - 1 || index % labelEvery === 0,
+    };
+  });
+});
 
-function formatShortDate(value: string) {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
-}
+const revenuePoints = computed(() => {
+  const innerWidth = chartWidth - chartPadding * 2;
+  const innerHeight = chartHeight - chartPadding * 2;
+  const count = Math.max(salesByDay.value.length - 1, 1);
+
+  return salesByDay.value.map((item, index) => ({
+    x: chartPadding + (index / count) * innerWidth,
+    y: chartHeight - chartPadding - (Number(item.revenue) / maxRevenue.value) * innerHeight,
+  }));
+});
+
+const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${point.x},${point.y}`).join(" "));
 </script>
 
 <template>
   <div>
     <AdminHeader
-      title="Обзор"
-      description="Сводка по магазину Protech"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Обзор' }]"
+      kicker="Dashboard"
+      title="Обзор магазина"
+      description="Продажи, заказы, склад и коммуникации за выбранный период"
     />
 
-    <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-      <div v-if="pending" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Skeleton v-for="i in 4" :key="i" class="h-32 rounded-xl" />
-      </div>
+    <div class="admin-content stack-lg">
+      <div v-if="pending" class="empty-state">Загружаю аналитику...</div>
 
-      <div v-else-if="data" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <AdminStatCard
-          title="Товары"
-          :value="data.stats.productsActive"
-          :description="`${data.stats.productsTotal} всего`"
-          :icon="Package"
-        />
-        <AdminStatCard
-          title="Заказы"
-          :value="data.stats.ordersTotal"
-          :description="`${data.stats.ordersNew} новых`"
-          :icon="ShoppingCart"
-        />
-        <AdminStatCard
-          title="Выручка"
-          :value="formatPrice(data.stats.revenuePaid)"
-          description="Оплаченные заказы"
-          :icon="TrendingUp"
-        />
-        <AdminStatCard
-          title="Низкий остаток"
-          :value="data.stats.lowStock"
-          description="Товаров ≤ 5 шт."
-          :icon="AlertTriangle"
-        />
-      </div>
+      <template v-else-if="data">
+        <section class="metrics-grid">
+          <AdminMetricCard
+            title="Товары"
+            :value="data.stats.productsActive"
+            :description="`${data.stats.productsTotal} товаров всего`"
+            :icon="Package"
+          />
+          <AdminMetricCard
+            title="Заказы"
+            :value="data.stats.ordersTotal"
+            :description="`${data.stats.ordersNew} новых заказов`"
+            :icon="ShoppingCart"
+            tone="teal"
+          />
+          <AdminMetricCard
+            title="Выручка"
+            :value="formatPrice(data.stats.revenuePaid)"
+            description="Оплаченная выручка"
+            :icon="TrendingUp"
+            tone="amber"
+          />
+          <AdminMetricCard
+            title="Низкий остаток"
+            :value="data.stats.lowStock"
+            description="Товаров с остатком ≤ 5"
+            :icon="AlertTriangle"
+            tone="red"
+          />
+        </section>
 
-      <Card v-if="data" class="admin-card">
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2 text-base">
-            <BarChart3 class="size-4 text-primary" />
-            Аналитика продаж
-          </CardTitle>
-          <CardDescription>
-            {{ formatShortDate(data.analytics.period.startDate) }} - {{ formatShortDate(data.analytics.period.endDate) }}
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="space-y-5">
-          <div class="grid gap-3 lg:grid-cols-[180px_1fr_180px]">
-            <Select v-model="period">
-              <SelectTrigger>
-                <SelectValue placeholder="Период" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">7 дней</SelectItem>
-                <SelectItem value="30">30 дней</SelectItem>
-                <SelectItem value="90">90 дней</SelectItem>
-                <SelectItem value="custom">Свой период</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div class="grid gap-3 sm:grid-cols-2">
-              <Input
-                v-model="customStart"
-                type="date"
-                :disabled="period !== 'custom'"
-                aria-label="Дата начала периода"
-              />
-              <Input
-                v-model="customEnd"
-                type="date"
-                :disabled="period !== 'custom'"
-                aria-label="Дата окончания периода"
-              />
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Аналитика продаж</h2>
+              <p class="panel-description">
+                {{ formatShortDate(data.analytics.period.startDate) }} - {{ formatShortDate(data.analytics.period.endDate) }}
+              </p>
             </div>
-
-            <Select v-model="sortBy">
-              <SelectTrigger>
-                <SelectValue placeholder="Сортировка" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="quantity">По количеству</SelectItem>
-                <SelectItem value="revenue">По выручке</SelectItem>
-                <SelectItem value="orders">По заказам</SelectItem>
-              </SelectContent>
-            </Select>
+            <BarChart3 style="color: var(--admin-primary)" />
           </div>
+          <div class="panel-body stack">
+            <div class="form-grid-3">
+              <AdminSelect v-model="period" :options="periodOptions" placeholder="Период" />
+              <AdminSelect v-model="selectedProductId" :options="productOptions" placeholder="Товар" />
+              <AdminSelect v-model="sortBy" :options="sortOptions" placeholder="Сортировка" />
+            </div>
 
-          <div class="grid gap-3 lg:grid-cols-[1fr_220px_220px_220px]">
-            <Select v-model="selectedProductId">
-              <SelectTrigger>
-                <SelectValue placeholder="Товар" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все товары</SelectItem>
-                <SelectItem
-                  v-for="product in data.analytics.productOptions"
-                  :key="product.id"
-                  :value="String(product.id)"
-                >
-                  {{ product.name }} · {{ product.article }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <div class="rounded-lg border border-border/60 bg-muted/20 p-3">
-              <p class="text-xs text-muted-foreground">Продано</p>
-              <p class="text-xl font-semibold">{{ data.analytics.totals.quantity }} шт.</p>
+            <div v-if="period === 'custom'" class="form-grid">
+              <div class="field">
+                <label for="custom-start">Начало периода</label>
+                <input id="custom-start" v-model="customStart" class="input" type="date" />
+              </div>
+              <div class="field">
+                <label for="custom-end">Конец периода</label>
+                <input id="custom-end" v-model="customEnd" class="input" type="date" />
+              </div>
             </div>
-            <div class="rounded-lg border border-border/60 bg-muted/20 p-3">
-              <p class="text-xs text-muted-foreground">Заказов</p>
-              <p class="text-xl font-semibold">{{ data.analytics.totals.orders }}</p>
-            </div>
-            <div class="rounded-lg border border-border/60 bg-muted/20 p-3">
-              <p class="text-xs text-muted-foreground">Выручка</p>
-              <p class="text-xl font-semibold">{{ formatPrice(data.analytics.totals.revenue) }}</p>
+
+            <div class="mini-stat-grid">
+              <div class="mini-stat">
+                <p class="mini-stat-label">Товар</p>
+                <p class="mini-stat-value" style="font-size: 16px">{{ selectedProductName }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Продано</p>
+                <p class="mini-stat-value">{{ data.analytics.totals.quantity }} шт.</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Заказов</p>
+                <p class="mini-stat-value">{{ data.analytics.totals.orders }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Средний чек</p>
+                <p class="mini-stat-value">{{ formatPrice(data.analytics.totals.averageOrderValue) }}</p>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      <div v-if="data" class="grid gap-4 xl:grid-cols-2">
-        <Card class="admin-card">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-base">
-              <BarChart3 class="size-4 text-primary" />
-              Количество продаж
-            </CardTitle>
-            <CardDescription>{{ selectedProductName }}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div class="h-72 w-full overflow-hidden">
-              <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" class="size-full" role="img">
-                <line
-                  :x1="chartPadding"
-                  :x2="chartWidth - chartPadding"
-                  :y1="chartHeight - chartPadding"
-                  :y2="chartHeight - chartPadding"
-                  class="stroke-border"
-                />
-                <g v-for="item in barChartItems" :key="item.date">
-                  <rect
-                    :x="item.x"
-                    :y="item.y"
-                    :width="item.width"
-                    :height="item.height"
-                    rx="3"
-                    class="fill-primary/75"
+        <section class="chart-grid">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Количество продаж</h2>
+                <p class="panel-description">{{ selectedProductName }}</p>
+              </div>
+              <BarChart3 style="color: var(--admin-primary)" />
+            </div>
+            <div class="panel-body">
+              <div class="chart-shell">
+                <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" role="img">
+                  <line
+                    :x1="chartPadding"
+                    :x2="chartWidth - chartPadding"
+                    :y1="chartHeight - chartPadding"
+                    :y2="chartHeight - chartPadding"
+                    stroke="#d9e2ec"
                   />
-                  <text
-                    v-if="item.showLabel"
-                    :x="item.x + item.width / 2"
-                    :y="chartHeight - 8"
-                    text-anchor="middle"
-                    class="fill-muted-foreground text-[10px]"
-                  >
-                    {{ item.label }}
-                  </text>
-                </g>
-              </svg>
+                  <g v-for="item in bars" :key="item.date">
+                    <rect :x="item.x" :y="item.y" :width="item.width" :height="item.height" rx="4" fill="#0f6fff" opacity="0.82" />
+                    <text v-if="item.showLabel" :x="item.x + item.width / 2" :y="chartHeight - 8" text-anchor="middle" fill="#667085" font-size="10">
+                      {{ item.label }}
+                    </text>
+                  </g>
+                </svg>
+              </div>
             </div>
-            <p v-if="!data.analytics.totals.quantity" class="mt-3 text-center text-sm text-muted-foreground">
-              За выбранный период продаж нет
-            </p>
-          </CardContent>
-        </Card>
+          </article>
 
-        <Card class="admin-card">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-base">
-              <LineChart class="size-4 text-primary" />
-              Выручка по дням
-            </CardTitle>
-            <CardDescription>{{ selectedProductName }}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div class="h-72 w-full overflow-hidden">
-              <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" class="size-full" role="img">
-                <line
-                  :x1="chartPadding"
-                  :x2="chartWidth - chartPadding"
-                  :y1="chartHeight - chartPadding"
-                  :y2="chartHeight - chartPadding"
-                  class="stroke-border"
-                />
-                <polyline
-                  v-if="salesByDay.length"
-                  :points="revenueLinePoints"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="3"
-                  class="text-primary"
-                />
-                <circle
-                  v-for="(point, index) in revenueLinePoints.split(' ').filter(Boolean)"
-                  :key="`${point}-${index}`"
-                  :cx="Number(point.split(',')[0])"
-                  :cy="Number(point.split(',')[1])"
-                  r="3"
-                  class="fill-background stroke-primary"
-                  stroke-width="2"
-                />
-                <text
-                  :x="chartPadding"
-                  y="16"
-                  class="fill-muted-foreground text-[11px]"
-                >
-                  {{ formatPrice(maxRevenue) }}
-                </text>
-              </svg>
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Выручка по дням</h2>
+                <p class="panel-description">{{ formatPrice(data.analytics.totals.revenue) }} за период</p>
+              </div>
+              <LineChart style="color: var(--admin-teal)" />
             </div>
-            <p class="mt-3 text-sm text-muted-foreground">
-              Средний чек: {{ formatPrice(data.analytics.totals.averageOrderValue) }}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+            <div class="panel-body">
+              <div class="chart-shell">
+                <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" role="img">
+                  <line
+                    :x1="chartPadding"
+                    :x2="chartWidth - chartPadding"
+                    :y1="chartHeight - chartPadding"
+                    :y2="chartHeight - chartPadding"
+                    stroke="#d9e2ec"
+                  />
+                  <polyline v-if="revenuePolyline" :points="revenuePolyline" fill="none" stroke="#0f9f8f" stroke-width="4" stroke-linecap="round" />
+                  <circle v-for="(point, index) in revenuePoints" :key="index" :cx="point.x" :cy="point.y" r="4" fill="#ffffff" stroke="#0f9f8f" stroke-width="3" />
+                  <text :x="chartPadding" y="18" fill="#667085" font-size="11">{{ formatPrice(maxRevenue) }}</text>
+                </svg>
+              </div>
+            </div>
+          </article>
+        </section>
 
-      <Card v-if="data" class="admin-card">
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2 text-base">
-            <PackageSearch class="size-4 text-primary" />
-            Лучшие товары за период
-          </CardTitle>
-          <CardDescription>Сортировка применяется к выбранному периоду</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table v-if="data.analytics.productSales.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead class="w-12">№</TableHead>
-                <TableHead>Товар</TableHead>
-                <TableHead>Артикул</TableHead>
-                <TableHead>Продано</TableHead>
-                <TableHead>Заказов</TableHead>
-                <TableHead>Выручка</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="(product, index) in data.analytics.productSales" :key="product.productId">
-                <TableCell class="text-muted-foreground">{{ index + 1 }}</TableCell>
-                <TableCell>
-                  <div class="flex items-center gap-3">
-                    <img :src="product.mainImage" :alt="product.name" class="size-10 rounded-md object-cover" />
-                    <span class="font-medium">{{ product.name }}</span>
-                  </div>
-                </TableCell>
-                <TableCell class="text-muted-foreground">{{ product.article }}</TableCell>
-                <TableCell>{{ product.quantity }} шт.</TableCell>
-                <TableCell>{{ product.orders }}</TableCell>
-                <TableCell>{{ formatPrice(product.revenue) }}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p v-else class="py-8 text-center text-sm text-muted-foreground">
-            За выбранный период нет оплаченных продаж
-          </p>
-        </CardContent>
-      </Card>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Лучшие товары</h2>
+              <p class="panel-description">Рейтинг за выбранный период</p>
+            </div>
+            <PackageSearch style="color: var(--admin-lime)" />
+          </div>
+          <div class="panel-body">
+            <div v-if="data.analytics.productSales.length" class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Товар</th>
+                    <th>Артикул</th>
+                    <th>Продано</th>
+                    <th>Заказы</th>
+                    <th>Выручка</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(product, index) in data.analytics.productSales" :key="product.productId">
+                    <td>{{ index + 1 }}</td>
+                    <td>
+                      <div class="entity-cell">
+                        <img class="thumb" :src="product.mainImage" :alt="product.name" />
+                        <p class="entity-title">{{ product.name }}</p>
+                      </div>
+                    </td>
+                    <td>{{ product.article }}</td>
+                    <td>{{ product.quantity }} шт.</td>
+                    <td>{{ product.orders }}</td>
+                    <td>{{ formatPrice(product.revenue) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="empty-state">За выбранный период оплаченных продаж нет</div>
+          </div>
+        </section>
 
-      <div v-if="data" class="grid gap-4 md:grid-cols-2">
-        <Card class="admin-card">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-base">
-              <MessageSquare class="size-4 text-primary" />
-              Отзывы без ответа
-            </CardTitle>
-            <CardDescription>Требуют внимания модератора</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div class="text-3xl font-bold">{{ data.stats.reviewsPending }}</div>
-            <NuxtLink to="/admin/reviews?pending=true" class="mt-2 inline-block text-sm text-primary hover:underline">
-              Перейти к отзывам →
-            </NuxtLink>
-          </CardContent>
-        </Card>
+        <section class="chart-grid">
+          <AdminMetricCard
+            title="Отзывы"
+            :value="data.stats.reviewsPending"
+            description="Отзывы без ответа"
+            :icon="MessageSquare"
+            tone="amber"
+            to="/admin/reviews?pending=true"
+          />
+          <AdminMetricCard
+            title="FAQ"
+            :value="data.stats.faqPending"
+            description="Вопросы FAQ без ответа"
+            :icon="HelpCircle"
+            tone="teal"
+            to="/admin/faq?pending=true"
+          />
+        </section>
 
-        <Card class="admin-card">
-          <CardHeader>
-            <CardTitle class="flex items-center gap-2 text-base">
-              <HelpCircle class="size-4 text-primary" />
-              Вопросы FAQ
-            </CardTitle>
-            <CardDescription>Ожидают ответа</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div class="text-3xl font-bold">{{ data.stats.faqPending }}</div>
-            <NuxtLink to="/admin/faq?pending=true" class="mt-2 inline-block text-sm text-primary hover:underline">
-              Перейти к FAQ →
-            </NuxtLink>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card class="admin-card">
-        <CardHeader>
-          <CardTitle>Последние заказы</CardTitle>
-          <CardDescription>5 последних заказов в системе</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table v-if="data?.recentOrders.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead>№</TableHead>
-                <TableHead>Клиент</TableHead>
-                <TableHead>Сумма</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Дата</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="order in data.recentOrders" :key="order.id">
-                <TableCell class="font-medium">#{{ order.id }}</TableCell>
-                <TableCell>{{ order.user?.name || order.user?.email || "—" }}</TableCell>
-                <TableCell>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</TableCell>
-                <TableCell>
-                  <AdminStatusBadge :status="order.orderStatus" type="order" />
-                </TableCell>
-                <TableCell class="text-muted-foreground">{{ formatDate(order.createdAt) }}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <p v-else class="py-8 text-center text-sm text-muted-foreground">Заказов пока нет</p>
-        </CardContent>
-      </Card>
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Последние заказы</h2>
+              <p class="panel-description">Пять свежих заказов в системе</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div v-if="data.recentOrders.length" class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Заказ</th>
+                    <th>Клиент</th>
+                    <th>Сумма</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="order in data.recentOrders" :key="order.id">
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.user?.name || order.user?.email || "Гость" }}</td>
+                    <td>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</td>
+                    <td><AdminStatusBadge :status="order.orderStatus" type="order" /></td>
+                    <td>{{ formatDate(order.createdAt) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class="empty-state">Заказов пока нет</div>
+          </div>
+        </section>
+      </template>
     </div>
   </div>
 </template>

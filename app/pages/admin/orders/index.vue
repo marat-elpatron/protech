@@ -1,252 +1,198 @@
 <script setup lang="ts">
+import { ShoppingCart } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import { Eye, ShoppingCart } from "@lucide/vue";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { OrderItem } from "@/composables/useAdminApi";
-import {
-  getObtainingMethodLabel,
+  formatDate,
+  formatPrice,
   orderStatusOptions,
   paymentStatusOptions,
-} from "@/utils/adminStatus";
+} from "@/utils/adminFormat";
+import type { OrderItem, OrderStatus, PaymentStatus } from "@/composables/useAdminApi";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
 const api = useAdminApi();
-const statusFilter = ref("all");
+const status = ref("all");
 const page = ref(1);
-const selectedOrder = ref<OrderItem | null>(null);
-const updating = ref(false);
+const updating = ref<string | null>(null);
+const orderFilterOptions = [
+  { value: "all", label: "Все статусы заказов" },
+  ...orderStatusOptions,
+];
 
-const { data, pending, refresh } = await useAsyncData(
-  "orders",
-  () =>
-    api.getOrders({
-      page: page.value,
-      status: statusFilter.value === "all" ? undefined : statusFilter.value,
-    }),
-  { watch: [page, statusFilter] },
-);
+const orderQuery = computed(() => ({
+  page: page.value,
+  status: status.value === "all" ? undefined : status.value,
+}));
 
-function formatPrice(value: number | string) {
-  return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB" }).format(Number(value));
+watch(status, () => {
+  page.value = 1;
+});
+
+const { data: orders, pending, refresh } = await useAsyncData("admin-orders", () => api.getOrders(orderQuery.value), {
+  watch: [orderQuery],
+});
+
+function orderTotal(order: OrderItem) {
+  if (order.payment) return Number(order.payment.amount);
+  return order.orderItems.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
-
-async function updateOrderStatus(orderId: number, orderStatus: string) {
-  updating.value = true;
+async function changeOrderStatus(orderId: number, value: string) {
+  updating.value = `order-${orderId}`;
   try {
-    await api.updateOrderStatus(orderId, orderStatus);
-    toast.success("Статус заказа обновлён");
+    await api.updateOrderStatus(orderId, value as OrderStatus);
     await refresh();
-    if (selectedOrder.value?.id === orderId) {
-      selectedOrder.value = data.value?.items.find((o) => o.id === orderId) ?? null;
-    }
-  } catch {
-    toast.error("Ошибка обновления");
+    toast.success("Статус заказа обновлен");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось обновить статус заказа");
   } finally {
-    updating.value = false;
+    updating.value = null;
   }
 }
 
-async function updatePaymentStatus(orderId: number, paymentMethod: string) {
-  updating.value = true;
+async function changePaymentStatus(orderId: number, value: string) {
+  updating.value = `payment-${orderId}`;
   try {
-    await api.updatePaymentStatus(orderId, paymentMethod);
-    toast.success("Статус оплаты обновлён");
+    await api.updatePaymentStatus(orderId, value as PaymentStatus);
     await refresh();
-    if (selectedOrder.value?.id === orderId) {
-      selectedOrder.value = data.value?.items.find((o) => o.id === orderId) ?? null;
-    }
-  } catch {
-    toast.error("Ошибка обновления");
+    toast.success("Статус оплаты обновлен");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось обновить статус оплаты");
   } finally {
-    updating.value = false;
+    updating.value = null;
   }
 }
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Заказы" description="Управление заказами и оплатой"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Заказы' }]" />
+    <AdminHeader
+      kicker="Orders"
+      title="Заказы"
+      description="Просмотр состава заказа, доставки, оплаты и смена статусов"
+    />
 
-    <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
-      <Select v-model="statusFilter">
-        <SelectTrigger class="w-full sm:w-52">
-          <SelectValue placeholder="Статус заказа" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Все статусы</SelectItem>
-          <SelectItem v-for="status in orderStatusOptions" :key="status.value" :value="status.value">
-            {{ status.label }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Card>
-        <CardContent class="p-0">
-          <div v-if="pending" class="space-y-3 p-4">
-            <Skeleton v-for="i in 5" :key="i" class="h-12 w-full" />
-          </div>
-
-          <Table v-else-if="data?.items.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead>№</TableHead>
-                <TableHead>Клиент</TableHead>
-                <TableHead>Сумма</TableHead>
-                <TableHead>Оплата</TableHead>
-                <TableHead>Доставка</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Дата</TableHead>
-                <TableHead class="w-16" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="order in data.items" :key="order.id">
-                <TableCell class="font-medium">#{{ order.id }}</TableCell>
-                <TableCell>{{ order.user?.name || order.user?.email || "Гость" }}</TableCell>
-                <TableCell>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</TableCell>
-                <TableCell>
-                  <AdminStatusBadge v-if="order.payment" :status="order.payment.paymentStatus" type="payment" />
-                </TableCell>
-                <TableCell>{{ getObtainingMethodLabel(order.obtainingMethod) }}</TableCell>
-                <TableCell>
-                  <AdminStatusBadge :status="order.orderStatus" type="order" />
-                </TableCell>
-                <TableCell class="text-sm text-muted-foreground">{{ formatDate(order.createdAt) }}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="icon" @click="selectedOrder = order">
-                    <Eye class="size-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-
-          <div v-else class="flex flex-col items-center gap-3 py-16">
-            <ShoppingCart class="size-12 text-muted-foreground/40" />
-            <p class="text-muted-foreground">Заказов не найдено</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div v-if="data && data.pagination.pages > 1" class="flex justify-center gap-2">
-        <Button variant="outline" size="sm" :disabled="page <= 1" @click="page--">Назад</Button>
-        <span class="flex items-center px-3 text-sm text-muted-foreground">{{ page }} / {{ data.pagination.pages
-          }}</span>
-        <Button variant="outline" size="sm" :disabled="page >= data.pagination.pages" @click="page++">Далее</Button>
-      </div>
-    </div>
-
-    <Sheet :open="!!selectedOrder" @update:open="selectedOrder = null">
-      <SheetContent class="w-full overflow-y-auto sm:max-w-lg">
-        <SheetHeader v-if="selectedOrder">
-          <SheetTitle>Заказ #{{ selectedOrder.id }}</SheetTitle>
-        </SheetHeader>
-
-        <div v-if="selectedOrder" class="mt-6 space-y-6">
-          <div class="space-y-2 text-sm">
-            <p><span class="text-muted-foreground">Клиент:</span> {{ selectedOrder.user?.name ||
-              selectedOrder.user?.email }}</p>
-            <p><span class="text-muted-foreground">Дата:</span> {{ formatDate(selectedOrder.createdAt) }}</p>
-            <p>
-              <span class="text-muted-foreground">Способ получения:</span>
-              {{ getObtainingMethodLabel(selectedOrder.obtainingMethod) }}
-            </p>
-            <p v-if="selectedOrder.delivery"><span class="text-muted-foreground">Адрес:</span> {{
-              selectedOrder.delivery.address }}</p>
-          </div>
-
-          <Separator />
-
-          <div>
-            <h4 class="mb-3 text-sm font-medium">Товары</h4>
-            <div class="space-y-3">
-              <div v-for="item in selectedOrder.orderItems" :key="item.product.id" class="flex gap-3">
-                <img :src="item.product.mainImage" class="size-12 rounded-md object-cover" />
-                <div class="flex-1">
-                  <p class="text-sm font-medium">{{ item.product.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ item.quantity }} × {{ formatPrice(item.price) }}</p>
-                </div>
-              </div>
+    <div class="admin-content stack-lg">
+      <section class="panel">
+        <div class="panel-body toolbar">
+          <div class="filters">
+            <div style="width: 260px">
+              <AdminSelect v-model="status" :options="orderFilterOptions" placeholder="Статус заказа" />
             </div>
-          </div>
-
-          <Separator />
-
-          <div class="space-y-3">
-            <div class="space-y-2">
-              <Label>Статус заказа</Label>
-              <Select :model-value="selectedOrder.orderStatus" :disabled="updating"
-                @update:model-value="updateOrderStatus(selectedOrder!.id, $event as string)">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="status in orderStatusOptions" :key="status.value" :value="status.value">
-                    {{ status.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div v-if="selectedOrder.payment" class="space-y-2">
-              <Label>Статус оплаты</Label>
-              <Select :model-value="selectedOrder.payment.paymentStatus" :disabled="updating"
-                @update:model-value="updatePaymentStatus(selectedOrder!.id, $event as string)">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="status in paymentStatusOptions" :key="status.value" :value="status.value">
-                    {{ status.label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div v-if="selectedOrder.payment" class="rounded-lg bg-muted p-4">
-            <p class="text-sm text-muted-foreground">Итого</p>
-            <p class="text-2xl font-bold">{{ formatPrice(selectedOrder.payment.amount) }}</p>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
+      </section>
+
+      <div v-if="pending" class="empty-state">Загружаю заказы...</div>
+      <div v-else-if="orders?.items.length" class="order-grid">
+        <article v-for="order in orders.items" :key="order.id" class="order-card">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Заказ #{{ order.id }}</h2>
+              <p class="panel-description">
+                {{ order.user?.name || order.user?.email || "Гость" }} · {{ formatDate(order.createdAt) }}
+              </p>
+            </div>
+            <div class="toolbar" style="justify-content: flex-end">
+              <AdminStatusBadge :status="order.orderStatus" type="order" />
+              <AdminStatusBadge v-if="order.payment" :status="order.payment.paymentStatus" type="payment" />
+            </div>
+          </div>
+
+          <div class="order-card-body">
+            <div class="mini-stat-grid">
+              <div class="mini-stat">
+                <p class="mini-stat-label">Сумма</p>
+                <p class="mini-stat-value">{{ formatPrice(orderTotal(order)) }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Получение</p>
+                <p class="mini-stat-value" style="font-size: 16px">{{ order.obtainingMethod === "PICKUP" ? "Самовывоз" : "Доставка" }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Метод оплаты</p>
+                <p class="mini-stat-value" style="font-size: 16px">{{ order.paymentMethod === "ONLINE" ? "Онлайн" : "Офлайн" }}</p>
+              </div>
+              <div class="mini-stat">
+                <p class="mini-stat-label">Позиций</p>
+                <p class="mini-stat-value">{{ order.orderItems.length }}</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label :for="`order-status-${order.id}`">Статус заказа</label>
+                <AdminSelect
+                  :model-value="order.orderStatus"
+                  :options="orderStatusOptions"
+                  placeholder="Статус заказа"
+                  :aria-label="`Статус заказа ${order.id}`"
+                  :disabled="updating === `order-${order.id}`"
+                  @update:model-value="changeOrderStatus(order.id, $event)"
+                />
+              </div>
+              <div class="field">
+                <label :for="`payment-status-${order.id}`">Статус оплаты</label>
+                <AdminSelect
+                  :model-value="order.payment?.paymentStatus || ''"
+                  :options="paymentStatusOptions"
+                  placeholder="Статус оплаты"
+                  :aria-label="`Статус оплаты заказа ${order.id}`"
+                  :disabled="!order.payment || updating === `payment-${order.id}`"
+                  @update:model-value="changePaymentStatus(order.id, $event)"
+                />
+              </div>
+            </div>
+
+            <div v-if="order.delivery" class="answer-box">
+              <strong>Доставка:</strong>
+              {{ order.delivery.address }}
+              <span v-if="order.delivery.apartment">, кв. {{ order.delivery.apartment }}</span>
+              <span v-if="order.delivery.entrance">, подъезд {{ order.delivery.entrance }}</span>
+              <span v-if="order.delivery.floor">, этаж {{ order.delivery.floor }}</span>
+              <div v-if="order.delivery.comment" class="muted" style="margin-top: 6px">{{ order.delivery.comment }}</div>
+            </div>
+
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in order.orderItems" :key="item.product.id">
+                    <td>
+                      <div class="entity-cell">
+                        <img class="thumb" :src="item.product.mainImage" :alt="item.product.name" />
+                        <p class="entity-title">{{ item.product.name }}</p>
+                      </div>
+                    </td>
+                    <td>{{ item.quantity }} шт.</td>
+                    <td>{{ formatPrice(item.price) }}</td>
+                    <td>{{ formatPrice(Number(item.price) * item.quantity) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+
+        <div v-if="orders.pagination.pages > 1" class="pagination">
+          <button class="btn btn-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
+          <span class="muted">Страница {{ orders.pagination.page }} из {{ orders.pagination.pages }}</span>
+          <button class="btn btn-secondary" type="button" :disabled="page >= orders.pagination.pages" @click="page++">Вперед</button>
+        </div>
+      </div>
+
+      <div v-else class="empty-state">
+        <ShoppingCart style="width: 32px; height: 32px; margin-bottom: 8px" />
+        Заказов пока нет
+      </div>
+    </div>
   </div>
 </template>

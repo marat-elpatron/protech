@@ -1,175 +1,158 @@
 <script setup lang="ts">
+import { Check, FolderPlus, Pencil, Trash2, X } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import { Plus, Pencil, Trash2, FolderTree } from "@lucide/vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import type { CategoryItem } from "@/composables/useAdminApi";
 
 definePageMeta({ layout: "admin", middleware: "admin" });
 
 const api = useAdminApi();
-const dialogOpen = ref(false);
-const editingItem = ref<{ id: number; name: string } | null>(null);
-const deleteItem = ref<{ id: number; name: string } | null>(null);
-const loading = ref(false);
-const formName = ref("");
+const newName = ref("");
+const saving = ref(false);
+const editingId = ref<number | null>(null);
+const editingName = ref("");
 
-const { data, pending, refresh } = await useAsyncData("categories", () => api.getCategories());
+const { data: categories, pending, refresh } = await useAsyncData("admin-categories", () => api.getCategories(), {
+  default: () => [] as CategoryItem[],
+});
 
-function openCreate() {
-  editingItem.value = null;
-  formName.value = "";
-  dialogOpen.value = true;
-}
-
-function openEdit(item: { id: number; name: string }) {
-  editingItem.value = item;
-  formName.value = item.name;
-  dialogOpen.value = true;
-}
-
-async function handleSave() {
-  if (!formName.value.trim()) {
-    toast.error("Укажите название");
+async function createCategory() {
+  const name = newName.value.trim();
+  if (!name) {
+    toast.error("Введите название категории");
     return;
   }
-  loading.value = true;
+
+  saving.value = true;
   try {
-    if (editingItem.value) {
-      await api.updateCategory(editingItem.value.id, formName.value);
-      toast.success("Категория обновлена");
-    } else {
-      await api.createCategory(formName.value);
-      toast.success("Категория создана");
-    }
-    dialogOpen.value = false;
+    await api.createCategory(name);
+    newName.value = "";
     await refresh();
-  } catch {
-    toast.error("Ошибка сохранения");
+    toast.success("Категория создана");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось создать категорию");
   } finally {
-    loading.value = false;
+    saving.value = false;
   }
 }
 
-async function confirmDelete() {
-  if (!deleteItem.value) return;
+function startEdit(category: CategoryItem) {
+  editingId.value = category.id;
+  editingName.value = category.name;
+}
+
+async function saveEdit(categoryId: number) {
+  const name = editingName.value.trim();
+  if (!name) {
+    toast.error("Название не может быть пустым");
+    return;
+  }
+
   try {
-    await api.deleteCategory(deleteItem.value.id);
-    toast.success("Категория удалена");
-    deleteItem.value = null;
+    await api.updateCategory(categoryId, name);
+    editingId.value = null;
     await refresh();
-  } catch {
-    toast.error("Невозможно удалить — есть привязанные товары");
+    toast.success("Категория обновлена");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось обновить категорию");
+  }
+}
+
+async function deleteCategory(category: CategoryItem) {
+  if (!confirm(`Удалить категорию "${category.name}"?`)) return;
+
+  try {
+    await api.deleteCategory(category.id);
+    await refresh();
+    toast.success("Категория удалена");
+  } catch (error: any) {
+    toast.error(error?.data?.message || error?.message || "Не удалось удалить категорию");
   }
 }
 </script>
 
 <template>
   <div>
-    <AdminHeader title="Категории" description="Управление категориями каталога"
-      :breadcrumbs="[{ label: 'Admin', href: '/admin' }, { label: 'Категории' }]">
-      <template #actions>
-        <Button @click="openCreate">
-          <Plus class="size-4" />
-          Добавить
-        </Button>
-      </template>
-    </AdminHeader>
+    <AdminHeader
+      kicker="Catalog"
+      title="Категории"
+      description="Создание, редактирование и удаление товарных категорий"
+    />
 
-    <div class="flex flex-1 flex-col gap-4 p-4 md:p-6">
-      <Card>
-        <CardContent class="p-0">
-          <Table v-if="data?.length">
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Название</TableHead>
-                <TableHead class="w-24" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="item in data" :key="item.id">
-                <TableCell class="text-muted-foreground">#{{ item.id }}</TableCell>
-                <TableCell class="font-medium">{{ item.name }}</TableCell>
-                <TableCell>
-                  <div class="flex gap-1">
-                    <Button variant="ghost" size="icon" @click="openEdit(item)">
-                      <Pencil class="size-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" @click="deleteItem = item">
-                      <Trash2 class="size-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-          <div v-else-if="!pending" class="flex flex-col items-center gap-3 py-16">
-            <FolderTree class="size-12 text-muted-foreground/40" />
-            <p class="text-muted-foreground">Категорий пока нет</p>
+    <div class="admin-content stack-lg">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Новая категория</h2>
+            <p class="panel-description">Категорию можно также создать прямо из формы товара</p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
-
-    <Dialog v-model:open="dialogOpen">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{{ editingItem ? "Редактировать категорию" : "Новая категория" }}</DialogTitle>
-        </DialogHeader>
-        <div class="space-y-2 py-2">
-          <Label>Название</Label>
-          <Input v-model="formName" placeholder="Смартфоны" />
+          <FolderPlus style="color: var(--admin-primary)" />
         </div>
-        <DialogFooter>
-          <Button variant="outline" @click="dialogOpen = false">Отмена</Button>
-          <Button :disabled="loading" @click="handleSave">
-            {{ loading ? "Сохранение..." : "Сохранить" }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <form class="panel-body toolbar" @submit.prevent="createCategory">
+          <input v-model="newName" class="input" style="max-width: 520px" placeholder="Например, Смартфоны" />
+          <button class="btn btn-primary" type="submit" :disabled="saving">
+            <FolderPlus />
+            {{ saving ? "Создание..." : "Создать категорию" }}
+          </button>
+        </form>
+      </section>
 
-    <AlertDialog :open="!!deleteItem" @update:open="deleteItem = null">
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Удалить «{{ deleteItem?.name }}»?</AlertDialogTitle>
-          <AlertDialogDescription>Категория должна быть без привязанных товаров.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            @click="confirmDelete">
-            Удалить
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Все категории</h2>
+            <p class="panel-description">{{ categories.length }} записей</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div v-if="pending" class="empty-state">Загружаю категории...</div>
+          <div v-else-if="categories.length" class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Название</th>
+                  <th style="width: 190px">Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="category in categories" :key="category.id">
+                  <td>{{ category.id }}</td>
+                  <td>
+                    <input
+                      v-if="editingId === category.id"
+                      v-model="editingName"
+                      class="input compact"
+                      @keydown.enter.prevent="saveEdit(category.id)"
+                    />
+                    <strong v-else>{{ category.name }}</strong>
+                  </td>
+                  <td>
+                    <div class="toolbar" style="justify-content: flex-start">
+                      <template v-if="editingId === category.id">
+                        <button class="btn btn-soft btn-icon" type="button" title="Сохранить" @click="saveEdit(category.id)">
+                          <Check />
+                        </button>
+                        <button class="btn btn-secondary btn-icon" type="button" title="Отмена" @click="editingId = null">
+                          <X />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <button class="btn btn-secondary btn-icon" type="button" title="Редактировать" @click="startEdit(category)">
+                          <Pencil />
+                        </button>
+                        <button class="btn btn-danger btn-icon" type="button" title="Удалить" @click="deleteCategory(category)">
+                          <Trash2 />
+                        </button>
+                      </template>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class="empty-state">Категорий пока нет</div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>

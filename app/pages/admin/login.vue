@@ -1,39 +1,36 @@
 <script setup lang="ts">
+import { LockKeyhole, Mail, ShieldCheck, Zap } from "@lucide/vue";
 import { toast } from "vue-sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Zap, Loader2 } from "@lucide/vue";
 
 definePageMeta({ layout: false });
 
-const route = useRoute();
 const auth = useAuthStore();
-
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
-const error = ref("");
 
 onMounted(async () => {
-  await auth.fetchSession();
+  if (!auth.initialized) {
+    await auth.fetchSession();
+  }
+
   if (auth.isAdmin) {
-    await navigateTo((route.query.redirect as string) || "/admin");
+    await navigateTo("/admin");
   }
 });
 
-async function handleSubmit() {
-  error.value = "";
-  loading.value = true;
+async function submit() {
+  if (!email.value.trim() || !password.value) {
+    toast.error("Введите email и пароль");
+    return;
+  }
 
+  loading.value = true;
   try {
-    await auth.signIn(email.value, password.value);
-    toast.success("Добро пожаловать!");
-    await navigateTo((route.query.redirect as string) || "/admin");
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : "Ошибка входа";
+    await auth.signIn(email.value.trim(), password.value);
+    await navigateTo("/admin");
+  } catch (error: any) {
+    toast.error(error?.message || "Не удалось войти");
   } finally {
     loading.value = false;
   }
@@ -41,53 +38,73 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="relative flex min-h-svh items-center justify-center overflow-hidden bg-background p-4">
-    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.52_0.19_255/0.12),transparent_50%)]" />
+  <main class="login-page">
+    <section class="login-art">
+      <NuxtLink to="/admin" class="brand-mark" aria-label="Protech">
+        <Zap :size="22" />
+      </NuxtLink>
+      <div>
+        <div class="admin-kicker" style="color: #82f7e4">Protech control room</div>
+        <h1>Панель управления магазином</h1>
+        <p>
+          Каталог, склад, заказы, отзывы, FAQ и аналитика продаж собраны в одном рабочем интерфейсе.
+        </p>
+      </div>
+      <div class="toolbar" style="justify-content: flex-start">
+        <span class="badge badge-green">
+          <ShieldCheck style="width: 14px; height: 14px; margin-right: 6px" />
+          Только для администраторов
+        </span>
+      </div>
+    </section>
 
-    <Card class="relative z-10 w-full max-w-md border-border/60 shadow-xl">
-      <CardHeader class="space-y-3 text-center">
-        <div class="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Zap class="size-6" />
+    <section class="login-panel">
+      <form class="login-card stack" @submit.prevent="submit">
+        <div class="toolbar" style="align-items: flex-start">
+          <div>
+            <div class="admin-kicker">Вход</div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 850">Добро пожаловать</h1>
+            <p class="muted" style="margin: 8px 0 0">Используйте учетную запись администратора.</p>
+          </div>
+          <AdminThemeToggle />
         </div>
-        <CardTitle class="text-2xl font-bold">Protech Admin</CardTitle>
-        <CardDescription>Войдите в панель управления магазином</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form class="space-y-4" @submit.prevent="handleSubmit">
-          <Alert v-if="error" variant="destructive">
-            <AlertDescription>{{ error }}</AlertDescription>
-          </Alert>
 
-          <div class="space-y-2">
-            <Label for="email">Email</Label>
-            <Input
-              id="email"
+        <div class="field">
+          <label for="login-email">Email</label>
+          <div style="position: relative">
+            <Mail style="position: absolute; left: 12px; top: 12px; width: 18px; height: 18px; color: var(--admin-muted)" />
+            <input
+              id="login-email"
               v-model="email"
-              type="email"
-              placeholder="admin@protech.ru"
-              required
+              class="input"
+              style="padding-left: 40px"
               autocomplete="email"
+              placeholder="admin@protech.ru"
+              type="email"
             />
           </div>
+        </div>
 
-          <div class="space-y-2">
-            <Label for="password">Пароль</Label>
-            <Input
-              id="password"
+        <div class="field">
+          <label for="login-password">Пароль</label>
+          <div style="position: relative">
+            <LockKeyhole style="position: absolute; left: 12px; top: 12px; width: 18px; height: 18px; color: var(--admin-muted)" />
+            <input
+              id="login-password"
               v-model="password"
-              type="password"
-              placeholder="••••••••"
-              required
+              class="input"
+              style="padding-left: 40px"
               autocomplete="current-password"
+              placeholder="••••••••"
+              type="password"
             />
           </div>
+        </div>
 
-          <Button type="submit" class="w-full" :disabled="loading">
-            <Loader2 v-if="loading" class="size-4 animate-spin" />
-            {{ loading ? "Вход..." : "Войти" }}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  </div>
+        <button class="btn btn-primary" type="submit" :disabled="loading">
+          {{ loading ? "Проверяю доступ..." : "Войти в админку" }}
+        </button>
+      </form>
+    </section>
+  </main>
 </template>

@@ -6,17 +6,13 @@ export default defineNuxtConfig({
     enabled: true
   },
   css: ['~/assets/css/tailwind.css'],
-  modules: ['@pinia/nuxt', 'shadcn-nuxt'],
+  modules: ['@pinia/nuxt'],
   components: [
     {
       path: '~/components/admin',
       pathPrefix: false,
     },
   ],
-  shadcn: {
-    prefix: '',
-    componentDir: './app/components/ui'
-  },
   runtimeConfig: {
     yookassaShopId: process.env.YOOKASSA_SHOP_ID,
     yookassaSecretKey: process.env.YOOKASSA_SECRET_KEY,
