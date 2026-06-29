@@ -230,105 +230,92 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form class="stack-lg" @submit.prevent="handleSubmit">
-    <div class="two-col">
-      <div class="stack-lg">
-        <section class="panel">
-          <div class="panel-header">
+  <form @submit.prevent="handleSubmit">
+    <div>
+      <div>
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Основная информация</h2>
-              <p class="panel-description">Название, описание, категория и статус публикации</p>
+              <h2>Основная информация</h2>
+              <p>Название, описание, категория и статус публикации</p>
             </div>
           </div>
-          <div class="panel-body stack">
-            <div class="form-grid">
-              <div class="field" style="grid-column: 1 / -1">
-                <label for="product-name">Название</label>
-                <input id="product-name" v-model="form.name" class="input" placeholder="Например, iPhone 15 Pro" />
-              </div>
-              <div class="field">
-                <label for="product-article">Артикул</label>
-                <input id="product-article" v-model="form.article" class="input" placeholder="SKU-001" />
-              </div>
-              <div class="field">
-                <label for="product-category">Категория</label>
-                <AdminSelect
-                  v-model="categoryModel"
-                  :options="categoryOptions"
-                  placeholder="Выберите категорию"
-                  aria-label="Категория товара"
-                />
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="product-description">Описание</label>
-              <textarea id="product-description" v-model="form.description" class="textarea" rows="6" />
-            </div>
-
-            <div class="switch-row">
+          <div>
+            <div>
               <div>
-                <div class="field-label">Показывать в каталоге</div>
-                <div class="muted" style="font-size: 13px">Неактивные товары остаются в админке, но скрыты от покупателей.</div>
+                <label for="product-name">Название</label>
+                <input id="product-name" v-model="form.name" placeholder="Например, iPhone 15 Pro" />
               </div>
-              <button
-                class="toggle"
-                :class="{ active: form.isActive }"
-                type="button"
-                :aria-pressed="form.isActive"
-                @click="form.isActive = !form.isActive"
-              />
+              <div>
+                <label for="product-article">Артикул</label>
+                <input id="product-article" v-model="form.article" placeholder="SKU-001" />
+              </div>
+              <div>
+                <label for="product-category">Категория</label>
+                <AdminSelect v-model="categoryModel" :options="categoryOptions" placeholder="Выберите категорию"
+                  aria-label="Категория товара" />
+              </div>
             </div>
 
-            <div class="panel panel-muted">
-              <div class="panel-body stack">
-                <div class="toolbar">
+            <div>
+              <label for="product-description">Описание</label>
+              <textarea id="product-description" v-model="form.description" rows="6" />
+            </div>
+
+            <div>
+              <div>
+                <div>Показывать в каталоге</div>
+                <div>Неактивные товары остаются в админке, но скрыты от покупателей.</div>
+              </div>
+              <button :class="{ active: form.isActive }" type="button" :aria-pressed="form.isActive"
+                @click="form.isActive = !form.isActive" />
+            </div>
+
+            <div>
+              <div>
+                <div>
                   <div>
-                    <h3 class="panel-title">Быстро создать категорию</h3>
-                    <p class="panel-description">Новая категория сразу привяжется к товару</p>
+                    <h3>Быстро создать категорию</h3>
+                    <p>Новая категория сразу привяжется к товару</p>
                   </div>
-                  <button class="btn btn-soft" type="button" :disabled="creatingCategory" @click="createCategory">
+                  <button type="button" :disabled="creatingCategory" @click="createCategory">
                     <Plus />
                     {{ creatingCategory ? "Создание..." : "Создать" }}
                   </button>
                 </div>
-                <input
-                  v-model="newCategoryName"
-                  class="input"
-                  placeholder="Название новой категории"
-                  @keydown.enter.prevent="createCategory"
-                />
+                <input v-model="newCategoryName" placeholder="Название новой категории"
+                  @keydown.enter.prevent="createCategory" />
               </div>
             </div>
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Атрибуты товара</h2>
-              <p class="panel-description">Технические характеристики можно создать прямо здесь</p>
+              <h2>Атрибуты товара</h2>
+              <p>Технические характеристики можно создать прямо здесь</p>
             </div>
-            <button class="btn btn-secondary" type="button" @click="addAttributeRow">
+            <button type="button" @click="addAttributeRow">
               <Plus />
               Добавить
             </button>
           </div>
-          <div class="panel-body stack">
-            <div class="panel panel-muted">
-              <div class="panel-body stack">
-                <div class="form-grid">
-                  <div class="field">
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
                     <label for="new-attribute-name">Новый атрибут</label>
-                    <input id="new-attribute-name" v-model="newAttributeName" class="input" placeholder="Мощность" />
+                    <input id="new-attribute-name" v-model="newAttributeName" placeholder="Мощность" />
                   </div>
-                  <div class="field">
+                  <div>
                     <label for="new-attribute-unit">Единица</label>
-                    <input id="new-attribute-unit" v-model="newAttributeUnit" class="input" placeholder="Вт, ГБ, мм" />
+                    <input id="new-attribute-unit" v-model="newAttributeUnit" placeholder="Вт, ГБ, мм" />
                   </div>
                 </div>
                 <div>
-                  <button class="btn btn-soft" type="button" :disabled="creatingAttribute" @click="createAttribute">
+                  <button type="button" :disabled="creatingAttribute" @click="createAttribute">
                     <Plus />
                     {{ creatingAttribute ? "Создание..." : "Создать атрибут" }}
                   </button>
@@ -336,99 +323,90 @@ function handleSubmit() {
               </div>
             </div>
 
-            <div v-if="form.productAttributes.length" class="stack">
-              <div v-for="(item, index) in form.productAttributes" :key="index" class="attribute-row">
-                <AdminSelect
-                  :model-value="item.attributeId ? String(item.attributeId) : ''"
-                  :options="attributeOptions"
-                  placeholder="Атрибут"
-                  :aria-label="`Атрибут ${index + 1}`"
-                  @update:model-value="item.attributeId = Number($event)"
-                />
-                <input v-model="item.value" class="input" placeholder="Значение" />
-                <button class="btn btn-danger btn-icon" type="button" @click="form.productAttributes.splice(index, 1)">
+            <div v-if="form.productAttributes.length">
+              <div v-for="(item, index) in form.productAttributes" :key="index">
+                <AdminSelect :model-value="item.attributeId ? String(item.attributeId) : ''" :options="attributeOptions"
+                  placeholder="Атрибут" :aria-label="`Атрибут ${index + 1}`"
+                  @update:model-value="item.attributeId = Number($event)" />
+                <input v-model="item.value" placeholder="Значение" />
+                <button type="button" @click="form.productAttributes.splice(index, 1)">
                   <Trash2 />
                 </button>
               </div>
             </div>
-            <div v-else class="empty-state">Характеристики пока не добавлены</div>
+            <div v-else>Характеристики пока не добавлены</div>
           </div>
         </section>
       </div>
 
-      <div class="stack-lg">
-        <section class="panel">
-          <div class="panel-header">
+      <div>
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Главное фото</h2>
-              <p class="panel-description">Используется в каталоге и карточке товара</p>
+              <h2>Главное фото</h2>
+              <p>Используется в каталоге и карточке товара</p>
             </div>
           </div>
-          <div class="panel-body">
+          <div>
             <AdminImageUpload v-model="form.mainImage" label="" />
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Цена и маркетплейс</h2>
-              <p class="panel-description">Текущая цена, старая цена и ссылка на Ozon</p>
+              <h2>Цена и маркетплейс</h2>
+              <p>Текущая цена, старая цена и ссылка на Ozon</p>
             </div>
           </div>
-          <div class="panel-body stack">
-            <div class="form-grid">
-              <div class="field">
+          <div>
+            <div>
+              <div>
                 <label for="current-price">Цена</label>
-                <input id="current-price" v-model.number="form.currentPrice" class="input" min="0" step="0.01" type="number" />
+                <input id="current-price" v-model.number="form.currentPrice" min="0" step="0.01" type="number" />
               </div>
-              <div class="field">
+              <div>
                 <label for="old-price">Старая цена</label>
-                <input id="old-price" v-model.number="form.oldPrice" class="input" min="0" step="0.01" type="number" />
+                <input id="old-price" v-model.number="form.oldPrice" min="0" step="0.01" type="number" />
               </div>
             </div>
-            <div class="field">
+            <div>
               <label for="ozon-link">Ссылка Ozon</label>
-              <input id="ozon-link" v-model="form.ozonLink" class="input" placeholder="https://ozon.ru/..." />
+              <input id="ozon-link" v-model="form.ozonLink" placeholder="https://ozon.ru/..." />
             </div>
           </div>
         </section>
       </div>
     </div>
 
-    <section class="panel">
-      <div class="panel-header">
+    <section>
+      <div>
         <div>
-          <h2 class="panel-title">Галерея</h2>
-          <p class="panel-description">Дополнительные изображения товара</p>
+          <h2>Галерея</h2>
+          <p>Дополнительные изображения товара</p>
         </div>
-        <button class="btn btn-secondary" type="button" @click="addGalleryImage">
+        <button type="button" @click="addGalleryImage">
           <Plus />
           Добавить фото
         </button>
       </div>
-      <div class="panel-body">
-        <div v-if="form.productImages.length" class="media-grid">
-          <div v-for="(image, index) in form.productImages" :key="index" class="media-card">
-            <AdminImageUpload
-              :model-value="image.url"
-              compact
-              label=""
-              @update:model-value="image.url = $event"
-            />
-            <button class="btn btn-danger" type="button" @click="form.productImages.splice(index, 1)">
+      <div>
+        <div v-if="form.productImages.length">
+          <div v-for="(image, index) in form.productImages" :key="index">
+            <AdminImageUpload :model-value="image.url" compact label="" @update:model-value="image.url = $event" />
+            <button type="button" @click="form.productImages.splice(index, 1)">
               <Trash2 />
               Удалить
             </button>
           </div>
         </div>
-        <div v-else class="empty-state">Дополнительные изображения пока не добавлены</div>
+        <div v-else>Дополнительные изображения пока не добавлены</div>
       </div>
     </section>
 
-    <div class="sticky-actions">
-      <button class="btn btn-secondary" type="button" @click="router.back()">Отмена</button>
-      <button class="btn btn-primary" type="submit" :disabled="loading">
+    <div>
+      <button type="button" @click="router.back()">Отмена</button>
+      <button type="submit" :disabled="loading">
         <Save />
         {{ loading ? "Сохранение..." : initial ? "Сохранить товар" : "Создать товар" }}
       </button>

@@ -20,13 +20,13 @@ withDefaults(
 </script>
 
 <template>
-  <component :is="to ? 'NuxtLink' : 'article'" :to="to" class="metric-card">
-    <div class="metric-icon" :class="tone">
+  <component :is="to ? 'NuxtLink' : 'article'" :to="to">
+    <div :class="tone">
       <component :is="icon" v-if="icon" />
     </div>
     <div>
-      <p class="metric-value">{{ value }}</p>
-      <p class="metric-label">{{ description || title }}</p>
+      <p>{{ value }}</p>
+      <p>{{ description || title }}</p>
     </div>
   </component>
 </template>

@@ -26,5 +26,5 @@ const tone = computed(() => {
 </script>
 
 <template>
-  <span class="badge" :class="`badge-${tone}`">{{ label }}</span>
+  <span :class="`badge-${tone}`">{{ label }}</span>
 </template>

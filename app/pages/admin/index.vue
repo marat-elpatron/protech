@@ -107,125 +107,101 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Dashboard"
-      title="Обзор магазина"
-      description="Продажи, заказы, склад и коммуникации за выбранный период"
-    />
+    <AdminHeader kicker="Dashboard" title="Обзор магазина"
+      description="Продажи, заказы, склад и коммуникации за выбранный период" />
 
-    <div class="admin-content stack-lg">
-      <div v-if="pending" class="empty-state">Загружаю аналитику...</div>
-      <div v-else-if="error" class="empty-state">
-        <div class="empty-state-content">
-          <AlertTriangle style="width: 32px; height: 32px; color: var(--admin-red)" />
+    <div>
+      <div v-if="pending">Загружаю аналитику...</div>
+      <div v-else-if="error">
+        <div>
+          <AlertTriangle />
           <strong>Не удалось загрузить дашборд</strong>
           <span>Проверьте подключение к базе данных или повторите запрос.</span>
-          <button class="btn btn-secondary" type="button" @click="refresh()">Повторить</button>
+          <button type="button" @click="refresh()">Повторить</button>
         </div>
       </div>
 
       <template v-else-if="data">
-        <section class="metrics-grid">
-          <AdminMetricCard
-            title="Товары"
-            :value="data.stats.productsActive"
-            :description="`${data.stats.productsTotal} товаров всего`"
-            :icon="Package"
-          />
-          <AdminMetricCard
-            title="Заказы"
-            :value="data.stats.ordersTotal"
-            :description="`${data.stats.ordersNew} новых заказов`"
-            :icon="ShoppingCart"
-            tone="teal"
-          />
-          <AdminMetricCard
-            title="Выручка"
-            :value="formatPrice(data.stats.revenuePaid)"
-            description="Оплаченная выручка"
-            :icon="TrendingUp"
-            tone="amber"
-          />
-          <AdminMetricCard
-            title="Низкий остаток"
-            :value="data.stats.lowStock"
-            description="Товаров с остатком ≤ 5"
-            :icon="AlertTriangle"
-            tone="red"
-          />
+        <section>
+          <AdminMetricCard title="Товары" :value="data.stats.productsActive"
+            :description="`${data.stats.productsTotal} товаров всего`" :icon="Package" />
+          <AdminMetricCard title="Заказы" :value="data.stats.ordersTotal"
+            :description="`${data.stats.ordersNew} новых заказов`" :icon="ShoppingCart" tone="teal" />
+          <AdminMetricCard title="Выручка" :value="formatPrice(data.stats.revenuePaid)" description="Оплаченная выручка"
+            :icon="TrendingUp" tone="amber" />
+          <AdminMetricCard title="Низкий остаток" :value="data.stats.lowStock" description="Товаров с остатком ≤ 5"
+            :icon="AlertTriangle" tone="red" />
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Аналитика продаж</h2>
-              <p class="panel-description">
-                {{ formatShortDate(data.analytics.period.startDate) }} - {{ formatShortDate(data.analytics.period.endDate) }}
+              <h2>Аналитика продаж</h2>
+              <p>
+                {{ formatShortDate(data.analytics.period.startDate) }} - {{
+                  formatShortDate(data.analytics.period.endDate) }}
               </p>
             </div>
-            <BarChart3 style="color: var(--admin-primary)" />
+            <BarChart3 />
           </div>
-          <div class="panel-body stack">
-            <div class="form-grid-3">
+          <div>
+            <div>
               <AdminSelect v-model="period" :options="periodOptions" placeholder="Период" />
               <AdminSelect v-model="selectedProductId" :options="productOptions" placeholder="Товар" />
               <AdminSelect v-model="sortBy" :options="sortOptions" placeholder="Сортировка" />
             </div>
 
-            <div v-if="period === 'custom'" class="form-grid">
-              <div class="field">
+            <div v-if="period === 'custom'">
+              <div>
                 <label for="custom-start">Начало периода</label>
-                <input id="custom-start" v-model="customStart" class="input" type="date" />
+                <input id="custom-start" v-model="customStart" type="date" />
               </div>
-              <div class="field">
+              <div>
                 <label for="custom-end">Конец периода</label>
-                <input id="custom-end" v-model="customEnd" class="input" type="date" />
+                <input id="custom-end" v-model="customEnd" type="date" />
               </div>
             </div>
 
-            <div class="mini-stat-grid">
-              <div class="mini-stat">
-                <p class="mini-stat-label">Товар</p>
-                <p class="mini-stat-value" style="font-size: 16px">{{ selectedProductName }}</p>
+            <div>
+              <div>
+                <p>Товар</p>
+                <p>{{ selectedProductName }}</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Продано</p>
-                <p class="mini-stat-value">{{ data.analytics.totals.quantity }} шт.</p>
+              <div>
+                <p>Продано</p>
+                <p>{{ data.analytics.totals.quantity }} шт.</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Заказов</p>
-                <p class="mini-stat-value">{{ data.analytics.totals.orders }}</p>
+              <div>
+                <p>Заказов</p>
+                <p>{{ data.analytics.totals.orders }}</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Средний чек</p>
-                <p class="mini-stat-value">{{ formatPrice(data.analytics.totals.averageOrderValue) }}</p>
+              <div>
+                <p>Средний чек</p>
+                <p>{{ formatPrice(data.analytics.totals.averageOrderValue) }}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="chart-grid">
-          <article class="panel">
-            <div class="panel-header">
+        <section>
+          <article>
+            <div>
               <div>
-                <h2 class="panel-title">Количество продаж</h2>
-                <p class="panel-description">{{ selectedProductName }}</p>
+                <h2>Количество продаж</h2>
+                <p>{{ selectedProductName }}</p>
               </div>
-              <BarChart3 style="color: var(--admin-primary)" />
+              <BarChart3 />
             </div>
-            <div class="panel-body">
-              <div class="chart-shell">
+            <div>
+              <div>
                 <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" role="img">
-                  <line
-                    :x1="chartPadding"
-                    :x2="chartWidth - chartPadding"
-                    :y1="chartHeight - chartPadding"
-                    :y2="chartHeight - chartPadding"
-                    stroke="#d9e2ec"
-                  />
+                  <line :x1="chartPadding" :x2="chartWidth - chartPadding" :y1="chartHeight - chartPadding"
+                    :y2="chartHeight - chartPadding" stroke="#d9e2ec" />
                   <g v-for="item in bars" :key="item.date">
-                    <rect :x="item.x" :y="item.y" :width="item.width" :height="item.height" rx="4" fill="#0f6fff" opacity="0.82" />
-                    <text v-if="item.showLabel" :x="item.x + item.width / 2" :y="chartHeight - 8" text-anchor="middle" fill="#667085" font-size="10">
+                    <rect :x="item.x" :y="item.y" :width="item.width" :height="item.height" rx="4" fill="#0f6fff"
+                      opacity="0.82" />
+                    <text v-if="item.showLabel" :x="item.x + item.width / 2" :y="chartHeight - 8" text-anchor="middle"
+                      fill="#667085" font-size="10">
                       {{ item.label }}
                     </text>
                   </g>
@@ -234,26 +210,23 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
             </div>
           </article>
 
-          <article class="panel">
-            <div class="panel-header">
+          <article>
+            <div>
               <div>
-                <h2 class="panel-title">Выручка по дням</h2>
-                <p class="panel-description">{{ formatPrice(data.analytics.totals.revenue) }} за период</p>
+                <h2>Выручка по дням</h2>
+                <p>{{ formatPrice(data.analytics.totals.revenue) }} за период</p>
               </div>
-              <LineChart style="color: var(--admin-teal)" />
+              <LineChart />
             </div>
-            <div class="panel-body">
-              <div class="chart-shell">
+            <div>
+              <div>
                 <svg :viewBox="`0 0 ${chartWidth} ${chartHeight}`" role="img">
-                  <line
-                    :x1="chartPadding"
-                    :x2="chartWidth - chartPadding"
-                    :y1="chartHeight - chartPadding"
-                    :y2="chartHeight - chartPadding"
-                    stroke="#d9e2ec"
-                  />
-                  <polyline v-if="revenuePolyline" :points="revenuePolyline" fill="none" stroke="#0f9f8f" stroke-width="4" stroke-linecap="round" />
-                  <circle v-for="(point, index) in revenuePoints" :key="index" :cx="point.x" :cy="point.y" r="4" fill="#ffffff" stroke="#0f9f8f" stroke-width="3" />
+                  <line :x1="chartPadding" :x2="chartWidth - chartPadding" :y1="chartHeight - chartPadding"
+                    :y2="chartHeight - chartPadding" stroke="#d9e2ec" />
+                  <polyline v-if="revenuePolyline" :points="revenuePolyline" fill="none" stroke="#0f9f8f"
+                    stroke-width="4" stroke-linecap="round" />
+                  <circle v-for="(point, index) in revenuePoints" :key="index" :cx="point.x" :cy="point.y" r="4"
+                    fill="#ffffff" stroke="#0f9f8f" stroke-width="3" />
                   <text :x="chartPadding" y="18" fill="#667085" font-size="11">{{ formatPrice(maxRevenue) }}</text>
                 </svg>
               </div>
@@ -261,37 +234,33 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
           </article>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Лучшие товары</h2>
-              <p class="panel-description">Рейтинг за выбранный период</p>
+              <h2>Лучшие товары</h2>
+              <p>Рейтинг за выбранный период</p>
             </div>
-            <PackageSearch style="color: var(--admin-lime)" />
+            <PackageSearch />
           </div>
-          <div class="panel-body">
-            <div v-if="data.analytics.productSales.length" class="mobile-card-list">
-              <article
-                v-for="(product, index) in data.analytics.productSales"
-                :key="product.productId"
-                class="mobile-data-card"
-              >
-                <div class="entity-cell">
-                  <img class="thumb" :src="product.mainImage" :alt="product.name" />
+          <div>
+            <div v-if="data.analytics.productSales.length">
+              <article v-for="(product, index) in data.analytics.productSales" :key="product.productId">
+                <div>
+                  <img :src="product.mainImage" :alt="product.name" />
                   <div>
-                    <p class="entity-title">{{ index + 1 }}. {{ product.name }}</p>
-                    <p class="entity-meta">{{ product.article }}</p>
+                    <p>{{ index + 1 }}. {{ product.name }}</p>
+                    <p>{{ product.article }}</p>
                   </div>
                 </div>
-                <div class="mobile-data-grid">
+                <div>
                   <span>Продано <strong>{{ product.quantity }} шт.</strong></span>
                   <span>Заказы <strong>{{ product.orders }}</strong></span>
                   <span>Выручка <strong>{{ formatPrice(product.revenue) }}</strong></span>
                 </div>
               </article>
             </div>
-            <div v-if="data.analytics.productSales.length" class="table-wrap desktop-table">
-              <table class="data-table">
+            <div v-if="data.analytics.productSales.length">
+              <table>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -306,9 +275,9 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
                   <tr v-for="(product, index) in data.analytics.productSales" :key="product.productId">
                     <td>{{ index + 1 }}</td>
                     <td>
-                      <div class="entity-cell">
-                        <img class="thumb" :src="product.mainImage" :alt="product.name" />
-                        <p class="entity-title">{{ product.name }}</p>
+                      <div>
+                        <img :src="product.mainImage" :alt="product.name" />
+                        <p>{{ product.name }}</p>
                       </div>
                     </td>
                     <td>{{ product.article }}</td>
@@ -319,52 +288,40 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
                 </tbody>
               </table>
             </div>
-            <div v-else class="empty-state">За выбранный период оплаченных продаж нет</div>
+            <div v-else>За выбранный период оплаченных продаж нет</div>
           </div>
         </section>
 
-        <section class="chart-grid">
-          <AdminMetricCard
-            title="Отзывы"
-            :value="data.stats.reviewsPending"
-            description="Отзывы без ответа"
-            :icon="MessageSquare"
-            tone="amber"
-            to="/admin/reviews?pending=true"
-          />
-          <AdminMetricCard
-            title="FAQ"
-            :value="data.stats.faqPending"
-            description="Вопросы FAQ без ответа"
-            :icon="HelpCircle"
-            tone="teal"
-            to="/admin/faq?pending=true"
-          />
+        <section>
+          <AdminMetricCard title="Отзывы" :value="data.stats.reviewsPending" description="Отзывы без ответа"
+            :icon="MessageSquare" tone="amber" to="/admin/reviews?pending=true" />
+          <AdminMetricCard title="FAQ" :value="data.stats.faqPending" description="Вопросы FAQ без ответа"
+            :icon="HelpCircle" tone="teal" to="/admin/faq?pending=true" />
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Последние заказы</h2>
-              <p class="panel-description">Пять свежих заказов в системе</p>
+              <h2>Последние заказы</h2>
+              <p>Пять свежих заказов в системе</p>
             </div>
           </div>
-          <div class="panel-body">
-            <div v-if="data.recentOrders.length" class="mobile-card-list">
-              <article v-for="order in data.recentOrders" :key="order.id" class="mobile-data-card">
-                <div class="mobile-card-header">
+          <div>
+            <div v-if="data.recentOrders.length">
+              <article v-for="order in data.recentOrders" :key="order.id">
+                <div>
                   <strong>Заказ #{{ order.id }}</strong>
                   <AdminStatusBadge :status="order.orderStatus" type="order" />
                 </div>
-                <p class="entity-meta">{{ order.user?.name || order.user?.email || "Гость" }}</p>
-                <div class="mobile-data-grid">
+                <p>{{ order.user?.name || order.user?.email || "Гость" }}</p>
+                <div>
                   <span>Сумма <strong>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</strong></span>
                   <span>Дата <strong>{{ formatDate(order.createdAt) }}</strong></span>
                 </div>
               </article>
             </div>
-            <div v-if="data.recentOrders.length" class="table-wrap desktop-table">
-              <table class="data-table">
+            <div v-if="data.recentOrders.length">
+              <table>
                 <thead>
                   <tr>
                     <th>Заказ</th>
@@ -379,13 +336,15 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
                     <td>#{{ order.id }}</td>
                     <td>{{ order.user?.name || order.user?.email || "Гость" }}</td>
                     <td>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</td>
-                    <td><AdminStatusBadge :status="order.orderStatus" type="order" /></td>
+                    <td>
+                      <AdminStatusBadge :status="order.orderStatus" type="order" />
+                    </td>
                     <td>{{ formatDate(order.createdAt) }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div v-else class="empty-state">Заказов пока нет</div>
+            <div v-else>Заказов пока нет</div>
           </div>
         </section>
       </template>

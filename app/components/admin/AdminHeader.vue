@@ -7,13 +7,13 @@ defineProps<{
 </script>
 
 <template>
-  <header class="admin-header">
+  <header>
     <div>
-      <div v-if="kicker" class="admin-kicker">{{ kicker }}</div>
+      <div v-if="kicker">{{ kicker }}</div>
       <h1>{{ title }}</h1>
       <p v-if="description">{{ description }}</p>
     </div>
-    <div v-if="$slots.actions" class="toolbar">
+    <div v-if="$slots.actions">
       <slot name="actions" />
     </div>
   </header>

@@ -94,60 +94,38 @@ async function submitBulkDelivery(rows: { productId: number; quantity: number }[
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Inventory"
-      title="Склад и поставки"
-      description="Добавляйте приходы товаров и корректируйте фактические остатки"
-    />
+    <AdminHeader kicker="Inventory" title="Склад и поставки"
+      description="Добавляйте приходы товаров и корректируйте фактические остатки" />
 
-    <div class="admin-content stack-lg">
-      <section class="metrics-grid">
-        <AdminMetricCard
-          title="Склад"
-          :value="stocks.length"
-          description="Позиций на складе"
-          :icon="Warehouse"
-        />
-        <AdminMetricCard
-          title="Низкий остаток"
-          :value="stocks.filter((item) => item.quantity <= 5).length"
-          description="Товаров нужно пополнить"
-          :icon="PackagePlus"
-          tone="amber"
-        />
-        <AdminMetricCard
-          title="Всего единиц"
-          :value="stocks.reduce((sum, item) => sum + item.quantity, 0)"
-          description="Единиц товара"
-          :icon="Truck"
-          tone="teal"
-        />
+    <div>
+      <section>
+        <AdminMetricCard title="Склад" :value="stocks.length" description="Позиций на складе" :icon="Warehouse" />
+        <AdminMetricCard title="Низкий остаток" :value="stocks.filter((item) => item.quantity <= 5).length"
+          description="Товаров нужно пополнить" :icon="PackagePlus" tone="amber" />
+        <AdminMetricCard title="Всего единиц" :value="stocks.reduce((sum, item) => sum + item.quantity, 0)"
+          description="Единиц товара" :icon="Truck" tone="teal" />
       </section>
 
-      <AdminBulkStockDelivery
-        ref="bulkDelivery"
-        :stocks="stocks"
-        :submitting="bulkSubmitting"
-        @submit="submitBulkDelivery"
-      />
+      <AdminBulkStockDelivery ref="bulkDelivery" :stocks="stocks" :submitting="bulkSubmitting"
+        @submit="submitBulkDelivery" />
 
-      <section class="panel">
-        <div class="panel-body">
+      <section>
+        <div>
           <AdminSearchInput v-model="search" placeholder="Поиск по товару или артикулу" />
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-header">
+      <section>
+        <div>
           <div>
-            <h2 class="panel-title">Остатки</h2>
-            <p class="panel-description">Поставка прибавляется к текущему остатку</p>
+            <h2>Остатки</h2>
+            <p>Поставка прибавляется к текущему остатку</p>
           </div>
         </div>
-        <div class="panel-body">
-          <div v-if="pending" class="empty-state">Загружаю склад...</div>
-          <div v-else-if="filteredStocks.length" class="table-wrap">
-            <table class="data-table">
+        <div>
+          <div v-if="pending">Загружаю склад...</div>
+          <div v-else-if="filteredStocks.length">
+            <table>
               <thead>
                 <tr>
                   <th>Товар</th>
@@ -161,28 +139,30 @@ async function submitBulkDelivery(rows: { productId: number; quantity: number }[
                 <tr v-for="item in filteredStocks" :key="item.id">
                   <td>
                     <div>
-                      <p class="entity-title">{{ item.product.name }}</p>
-                      <p class="entity-meta">{{ item.product.article }}</p>
+                      <p>{{ item.product.name }}</p>
+                      <p>{{ item.product.article }}</p>
                     </div>
                   </td>
                   <td>
-                    <span class="badge" :class="item.quantity <= 5 ? 'badge-amber' : 'badge-green'">
+                    <span :class="item.quantity <= 5 ? 'badge-amber' : 'badge-green'">
                       {{ item.quantity }} шт.
                     </span>
                   </td>
                   <td>
-                    <form class="toolbar" style="justify-content: flex-start" @submit.prevent="addDelivery(item)">
-                      <input v-model.number="deliveries[item.product.id]" class="input compact" min="1" step="1" style="width: 120px" type="number" placeholder="+ шт." />
-                      <button class="btn btn-soft" type="submit" :disabled="updating === item.product.id">
+                    <form @submit.prevent="addDelivery(item)">
+                      <input v-model.number="deliveries[item.product.id]" min="1" step="1" type="number"
+                        placeholder="+ шт." />
+                      <button type="submit" :disabled="updating === item.product.id">
                         <Truck />
                         Приход
                       </button>
                     </form>
                   </td>
                   <td>
-                    <form class="toolbar" style="justify-content: flex-start" @submit.prevent="setExactQuantity(item)">
-                      <input v-model.number="exact[item.product.id]" class="input compact" min="0" step="1" style="width: 120px" type="number" placeholder="остаток" />
-                      <button class="btn btn-secondary" type="submit" :disabled="updating === item.product.id">Сохранить</button>
+                    <form @submit.prevent="setExactQuantity(item)">
+                      <input v-model.number="exact[item.product.id]" min="0" step="1" type="number"
+                        placeholder="остаток" />
+                      <button type="submit" :disabled="updating === item.product.id">Сохранить</button>
                     </form>
                   </td>
                   <td>{{ formatDate(item.updatedAt) }}</td>
@@ -190,7 +170,7 @@ async function submitBulkDelivery(rows: { productId: number; quantity: number }[
               </tbody>
             </table>
           </div>
-          <div v-else class="empty-state">Товары на складе не найдены</div>
+          <div v-else>Товары на складе не найдены</div>
         </div>
       </section>
     </div>

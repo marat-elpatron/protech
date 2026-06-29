@@ -48,45 +48,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="admin-shell">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar-header">
-        <NuxtLink to="/admin" class="brand-mark" aria-label="Protech Admin">
+  <div>
+    <aside>
+      <div>
+        <NuxtLink to="/admin" aria-label="Protech Admin">
           <Zap :size="21" />
         </NuxtLink>
         <div>
-          <p class="brand-title">Protech</p>
-          <p class="brand-subtitle">администрирование</p>
+          <p>Protech</p>
+          <p>администрирование</p>
         </div>
-        <div style="margin-left: auto">
+        <div>
           <AdminThemeToggle />
         </div>
       </div>
 
-      <nav class="admin-nav" aria-label="Разделы админ-панели">
-        <NuxtLink
-          v-for="item in navItems"
-          :key="item.href"
-          :to="item.href"
-          class="admin-nav-link"
-          :class="{ 'is-active': isActive(item.href) }"
-        >
+      <nav aria-label="Разделы админ-панели">
+        <NuxtLink v-for="item in navItems" :key="item.href" :to="item.href"
+          :class="{ 'is-active': isActive(item.href) }">
           <component :is="item.icon" />
           <span>{{ item.title }}</span>
         </NuxtLink>
       </nav>
 
-      <div class="admin-sidebar-footer">
-        <div class="admin-user">
-          <div class="admin-user-avatar">{{ initials }}</div>
-          <div style="min-width: 0">
-            <div class="admin-user-name">{{ auth.user?.name || "Администратор" }}</div>
-            <div class="admin-user-email">{{ auth.user?.email }}</div>
+      <div>
+        <div>
+          <div>{{ initials }}</div>
+          <div>
+            <div>{{ auth.user?.name || "Администратор" }}</div>
+            <div>{{ auth.user?.email }}</div>
           </div>
         </div>
-        <div class="sidebar-actions">
+        <div>
           <AdminThemeToggle />
-          <button class="btn sidebar-btn" type="button" @click="handleSignOut">
+          <button type="button" @click="handleSignOut">
             <LogOut />
             Выйти
           </button>
@@ -94,7 +89,7 @@ onMounted(() => {
       </div>
     </aside>
 
-    <main class="admin-main">
+    <main>
       <slot />
     </main>
   </div>

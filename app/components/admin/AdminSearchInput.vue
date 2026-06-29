@@ -17,13 +17,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="search-field">
+  <div>
     <Search />
-    <input
-      class="input"
-      :value="modelValue"
-      :placeholder="placeholder"
-      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-    />
+    <input :value="modelValue" :placeholder="placeholder"
+      @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)" />
   </div>
 </template>

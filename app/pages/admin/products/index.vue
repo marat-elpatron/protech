@@ -67,47 +67,44 @@ async function deleteProduct(product: ProductListItem) {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Catalog"
-      title="Товары"
-      description="Управление каталогом, ценами, изображениями и характеристиками"
-    >
+    <AdminHeader kicker="Catalog" title="Товары"
+      description="Управление каталогом, ценами, изображениями и характеристиками">
       <template #actions>
-        <NuxtLink class="btn btn-primary" to="/admin/products/new">
+        <NuxtLink to="/admin/products/new">
           <Plus />
           Новый товар
         </NuxtLink>
       </template>
     </AdminHeader>
 
-    <div class="admin-content stack-lg">
-      <section class="panel">
-        <div class="panel-body toolbar">
-          <div class="filters">
+    <div>
+      <section>
+        <div>
+          <div>
             <AdminSearchInput v-model="search" placeholder="Поиск по названию или артикулу" />
-            <div style="width: 240px">
+            <div>
               <AdminSelect v-model="categoryId" :options="categoryOptions" placeholder="Категория" />
             </div>
-            <div style="width: 190px">
+            <div>
               <AdminSelect v-model="isActive" :options="activityOptions" placeholder="Статус" />
             </div>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-header">
+      <section>
+        <div>
           <div>
-            <h2 class="panel-title">Каталог</h2>
-            <p class="panel-description">
+            <h2>Каталог</h2>
+            <p>
               {{ products?.pagination.total ?? 0 }} товаров найдено
             </p>
           </div>
         </div>
-        <div class="panel-body">
-          <div v-if="pending" class="empty-state">Загружаю товары...</div>
-          <div v-else-if="products?.items.length" class="table-wrap">
-            <table class="data-table">
+        <div>
+          <div v-if="pending">Загружаю товары...</div>
+          <div v-else-if="products?.items.length">
+            <table>
               <thead>
                 <tr>
                   <th>Товар</th>
@@ -116,38 +113,40 @@ async function deleteProduct(product: ProductListItem) {
                   <th>Остаток</th>
                   <th>Статус</th>
                   <th>Заказы</th>
-                  <th style="width: 170px">Действия</th>
+                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="product in products.items" :key="product.id">
                   <td>
-                    <div class="entity-cell">
-                      <img class="thumb" :src="product.mainImage" :alt="product.name" />
+                    <div>
+                      <img :src="product.mainImage" :alt="product.name" />
                       <div>
-                        <p class="entity-title">{{ product.name }}</p>
-                        <p class="entity-meta">{{ product.article }} · {{ product._count.reviews }} отзывов</p>
+                        <p>{{ product.name }}</p>
+                        <p>{{ product.article }} · {{ product._count.reviews }} отзывов</p>
                       </div>
                     </div>
                   </td>
                   <td>{{ product.category.name }}</td>
                   <td>
                     <strong>{{ formatPrice(product.currentPrice) }}</strong>
-                    <div v-if="product.oldPrice" class="entity-meta">было {{ formatPrice(product.oldPrice) }}</div>
+                    <div v-if="product.oldPrice">было {{ formatPrice(product.oldPrice) }}</div>
                   </td>
                   <td>
-                    <span class="badge" :class="stockOf(product) <= 5 ? 'badge-amber' : 'badge-green'">
+                    <span :class="stockOf(product) <= 5 ? 'badge-amber' : 'badge-green'">
                       {{ stockOf(product) }} шт.
                     </span>
                   </td>
-                  <td><AdminStatusBadge :status="product.isActive" type="activity" /></td>
+                  <td>
+                    <AdminStatusBadge :status="product.isActive" type="activity" />
+                  </td>
                   <td>{{ product._count.orderItems }}</td>
                   <td>
-                    <div class="toolbar" style="justify-content: flex-start">
-                      <NuxtLink class="btn btn-secondary btn-icon" :to="`/admin/products/${product.id}`" title="Редактировать">
+                    <div>
+                      <NuxtLink :to="`/admin/products/${product.id}`" title="Редактировать">
                         <Edit3 />
                       </NuxtLink>
-                      <button class="btn btn-danger btn-icon" type="button" title="Удалить" @click="deleteProduct(product)">
+                      <button type="button" title="Удалить" @click="deleteProduct(product)">
                         <Trash2 />
                       </button>
                     </div>
@@ -156,12 +155,12 @@ async function deleteProduct(product: ProductListItem) {
               </tbody>
             </table>
           </div>
-          <div v-else class="empty-state">Товары не найдены</div>
+          <div v-else>Товары не найдены</div>
 
-          <div v-if="products?.pagination.pages && products.pagination.pages > 1" class="pagination">
-            <button class="btn btn-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
-            <span class="muted">Страница {{ products.pagination.page }} из {{ products.pagination.pages }}</span>
-            <button class="btn btn-secondary" type="button" :disabled="page >= products.pagination.pages" @click="page++">Вперед</button>
+          <div v-if="products?.pagination.pages && products.pagination.pages > 1">
+            <button type="button" :disabled="page <= 1" @click="page--">Назад</button>
+            <span>Страница {{ products.pagination.page }} из {{ products.pagination.pages }}</span>
+            <button type="button" :disabled="page >= products.pagination.pages" @click="page++">Вперед</button>
           </div>
         </div>
       </section>

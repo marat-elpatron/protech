@@ -30,19 +30,11 @@ async function submit(payload: Record<string, unknown>) {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Catalog"
-      title="Новый товар"
-      description="Создайте карточку товара, категорию и атрибуты за один проход"
-    />
+    <AdminHeader kicker="Catalog" title="Новый товар"
+      description="Создайте карточку товара, категорию и атрибуты за один проход" />
 
-    <div class="admin-content">
-      <AdminProductForm
-        :attributes="attributes"
-        :categories="categories"
-        :loading="saving"
-        @submit="submit"
-      />
+    <div>
+      <AdminProductForm :attributes="attributes" :categories="categories" :loading="saving" @submit="submit" />
     </div>
   </div>
 </template>

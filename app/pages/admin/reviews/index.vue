@@ -49,76 +49,72 @@ async function answerReview(review: ReviewItem) {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Community"
-      title="Отзывы"
-      description="Отвечайте покупателям и закрывайте отзывы без ответа"
-    />
+    <AdminHeader kicker="Community" title="Отзывы" description="Отвечайте покупателям и закрывайте отзывы без ответа" />
 
-    <div class="admin-content stack-lg">
-      <section class="panel">
-        <div class="panel-body toolbar">
-          <div class="segmented">
+    <div>
+      <section>
+        <div>
+          <div>
             <button type="button" :class="{ active: !pendingOnly }" @click="pendingOnly = false">Все отзывы</button>
             <button type="button" :class="{ active: pendingOnly }" @click="pendingOnly = true">Без ответа</button>
           </div>
         </div>
       </section>
 
-      <div v-if="pending" class="empty-state">Загружаю отзывы...</div>
-      <div v-else-if="reviews?.items.length" class="review-grid">
-        <article v-for="review in reviews.items" :key="review.id" class="review-card">
-          <div class="panel-header">
-            <div class="entity-cell">
-              <img class="thumb" :src="review.product.mainImage" :alt="review.product.name" />
+      <div v-if="pending">Загружаю отзывы...</div>
+      <div v-else-if="reviews?.items.length">
+        <article v-for="review in reviews.items" :key="review.id">
+          <div>
+            <div>
+              <img :src="review.product.mainImage" :alt="review.product.name" />
               <div>
-                <h2 class="panel-title">{{ review.product.name }}</h2>
-                <p class="panel-description">
+                <h2>{{ review.product.name }}</h2>
+                <p>
                   {{ review.user.name || review.user.email }} · {{ formatDate(review.createdAt) }}
                 </p>
               </div>
             </div>
-            <div class="toolbar" style="justify-content: flex-end">
-              <span class="badge badge-amber">
-                <Star style="width: 14px; height: 14px; margin-right: 5px; fill: currentColor" />
+            <div>
+              <span>
+                <Star />
                 {{ review.rating }}/5
               </span>
               <AdminStatusBadge :status="review.isAnswered" type="answer" />
             </div>
           </div>
 
-          <div class="review-card-body">
-            <div class="form-grid">
-              <div v-if="review.advantages" class="answer-box">
+          <div>
+            <div>
+              <div v-if="review.advantages">
                 <strong>Плюсы:</strong>
                 <div>{{ review.advantages }}</div>
               </div>
-              <div v-if="review.disadvantages" class="answer-box">
+              <div v-if="review.disadvantages">
                 <strong>Минусы:</strong>
                 <div>{{ review.disadvantages }}</div>
               </div>
             </div>
 
-            <div v-if="review.comment" class="answer-box">
+            <div v-if="review.comment">
               <strong>Комментарий:</strong>
               <div>{{ review.comment }}</div>
             </div>
 
-            <div v-if="review.reviewPhotos.length" class="media-grid">
-              <img v-for="photo in review.reviewPhotos" :key="photo.id" class="thumb thumb-lg" :src="photo.url" alt="" />
+            <div v-if="review.reviewPhotos.length">
+              <img v-for="photo in review.reviewPhotos" :key="photo.id" :src="photo.url" alt="" />
             </div>
 
-            <div v-if="review.reviewAnswers.length" class="stack">
-              <div v-for="answer in review.reviewAnswers" :key="answer.id" class="answer-box">
+            <div v-if="review.reviewAnswers.length">
+              <div v-for="answer in review.reviewAnswers" :key="answer.id">
                 <strong>{{ answer.user?.name || "Администратор" }}</strong>
-                <div style="margin-top: 6px">{{ answer.text }}</div>
+                <div>{{ answer.text }}</div>
               </div>
             </div>
 
-            <form class="stack" @submit.prevent="answerReview(review)">
-              <textarea v-model="answers[review.id]" class="textarea" rows="4" placeholder="Ответ администратора" />
-              <div class="toolbar" style="justify-content: flex-end">
-                <button class="btn btn-primary" type="submit" :disabled="sending === review.id">
+            <form @submit.prevent="answerReview(review)">
+              <textarea v-model="answers[review.id]" rows="4" placeholder="Ответ администратора" />
+              <div>
+                <button type="submit" :disabled="sending === review.id">
                   <Send />
                   {{ sending === review.id ? "Отправка..." : "Ответить" }}
                 </button>
@@ -127,15 +123,15 @@ async function answerReview(review: ReviewItem) {
           </div>
         </article>
 
-        <div v-if="reviews.pagination.pages > 1" class="pagination">
-          <button class="btn btn-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
-          <span class="muted">Страница {{ reviews.pagination.page }} из {{ reviews.pagination.pages }}</span>
-          <button class="btn btn-secondary" type="button" :disabled="page >= reviews.pagination.pages" @click="page++">Вперед</button>
+        <div v-if="reviews.pagination.pages > 1">
+          <button type="button" :disabled="page <= 1" @click="page--">Назад</button>
+          <span>Страница {{ reviews.pagination.page }} из {{ reviews.pagination.pages }}</span>
+          <button type="button" :disabled="page >= reviews.pagination.pages" @click="page++">Вперед</button>
         </div>
       </div>
 
-      <div v-else class="empty-state">
-        <MessageSquareReply style="width: 32px; height: 32px; margin-bottom: 8px" />
+      <div v-else>
+        <MessageSquareReply />
         Отзывов для выбранного фильтра нет
       </div>
     </div>

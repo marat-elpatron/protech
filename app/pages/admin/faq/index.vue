@@ -49,62 +49,53 @@ async function answerQuestion(question: FaqItem) {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Support"
-      title="FAQ"
-      description="Отвечайте на вопросы покупателей в разделе вопросов и ответов"
-    />
+    <AdminHeader kicker="Support" title="FAQ"
+      description="Отвечайте на вопросы покупателей в разделе вопросов и ответов" />
 
-    <div class="admin-content stack-lg">
-      <section class="panel">
-        <div class="panel-body toolbar">
-          <div class="segmented">
+    <div>
+      <section>
+        <div>
+          <div>
             <button type="button" :class="{ active: !pendingOnly }" @click="pendingOnly = false">Все вопросы</button>
             <button type="button" :class="{ active: pendingOnly }" @click="pendingOnly = true">Без ответа</button>
           </div>
         </div>
       </section>
 
-      <div v-if="pending" class="empty-state">Загружаю вопросы...</div>
-      <div v-else-if="faq?.items.length" class="question-grid">
-        <article v-for="question in faq.items" :key="question.id" class="question-card">
-          <div class="panel-header">
+      <div v-if="pending">Загружаю вопросы...</div>
+      <div v-else-if="faq?.items.length">
+        <article v-for="question in faq.items" :key="question.id">
+          <div>
             <div>
-              <h2 class="panel-title">{{ question.title }}</h2>
-              <p class="panel-description">
+              <h2>{{ question.title }}</h2>
+              <p>
                 {{ question.user.name || question.user.email }} · {{ formatDate(question.createdAt) }}
               </p>
             </div>
             <AdminStatusBadge :status="question.isAnswered" type="answer" />
           </div>
 
-          <div class="question-card-body">
-            <div class="answer-box">
+          <div>
+            <div>
               <strong>Вопрос:</strong>
-              <div style="margin-top: 6px">{{ question.comment }}</div>
+              <div>{{ question.comment }}</div>
             </div>
 
-            <div v-if="question.shopQuestionImages.length" class="media-grid">
-              <img
-                v-for="image in question.shopQuestionImages"
-                :key="image.id"
-                class="thumb thumb-lg"
-                :src="image.url"
-                alt=""
-              />
+            <div v-if="question.shopQuestionImages.length">
+              <img v-for="image in question.shopQuestionImages" :key="image.id" :src="image.url" alt="" />
             </div>
 
-            <div v-if="question.shopAnswers.length" class="stack">
-              <div v-for="answer in question.shopAnswers" :key="answer.id" class="answer-box">
+            <div v-if="question.shopAnswers.length">
+              <div v-for="answer in question.shopAnswers" :key="answer.id">
                 <strong>{{ answer.user?.name || "Администратор" }}</strong>
-                <div style="margin-top: 6px">{{ answer.comment }}</div>
+                <div>{{ answer.comment }}</div>
               </div>
             </div>
 
-            <form class="stack" @submit.prevent="answerQuestion(question)">
-              <textarea v-model="answers[question.id]" class="textarea" rows="4" placeholder="Ответ на вопрос" />
-              <div class="toolbar" style="justify-content: flex-end">
-                <button class="btn btn-primary" type="submit" :disabled="sending === question.id">
+            <form @submit.prevent="answerQuestion(question)">
+              <textarea v-model="answers[question.id]" rows="4" placeholder="Ответ на вопрос" />
+              <div>
+                <button type="submit" :disabled="sending === question.id">
                   <Send />
                   {{ sending === question.id ? "Отправка..." : "Ответить" }}
                 </button>
@@ -113,15 +104,15 @@ async function answerQuestion(question: FaqItem) {
           </div>
         </article>
 
-        <div v-if="faq.pagination.pages > 1" class="pagination">
-          <button class="btn btn-secondary" type="button" :disabled="page <= 1" @click="page--">Назад</button>
-          <span class="muted">Страница {{ faq.pagination.page }} из {{ faq.pagination.pages }}</span>
-          <button class="btn btn-secondary" type="button" :disabled="page >= faq.pagination.pages" @click="page++">Вперед</button>
+        <div v-if="faq.pagination.pages > 1">
+          <button type="button" :disabled="page <= 1" @click="page--">Назад</button>
+          <span>Страница {{ faq.pagination.page }} из {{ faq.pagination.pages }}</span>
+          <button type="button" :disabled="page >= faq.pagination.pages" @click="page++">Вперед</button>
         </div>
       </div>
 
-      <div v-else class="empty-state">
-        <HelpCircle style="width: 32px; height: 32px; margin-bottom: 8px" />
+      <div v-else>
+        <HelpCircle />
         Вопросов для выбранного фильтра нет
       </div>
     </div>

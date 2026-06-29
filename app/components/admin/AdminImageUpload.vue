@@ -46,20 +46,20 @@ async function handleFile(event: Event) {
 </script>
 
 <template>
-  <div class="image-uploader">
-    <label v-if="label" class="field-label">{{ label }}</label>
-    <div class="image-drop" :style="{ minHeight: compact ? '132px' : undefined }">
-      <img v-if="modelValue" class="image-preview" :src="modelValue" alt="" />
-      <div v-else class="upload-placeholder">
-        <Loader2 v-if="uploading" class="animate-spin" />
+  <div>
+    <label v-if="label">{{ label }}</label>
+    <div>
+      <img v-if="modelValue" :src="modelValue" alt="" />
+      <div v-else>
+        <Loader2 v-if="uploading" />
         <ImagePlus v-else />
         <span>{{ uploading ? "Загрузка..." : "Перетащите или выберите файл" }}</span>
       </div>
       <input type="file" accept="image/*" :disabled="uploading" @change="handleFile" />
     </div>
-    <div class="toolbar">
-      <input v-model="inputValue" class="input compact" placeholder="/uploads/image.webp или https://..." />
-      <button v-if="modelValue" class="btn btn-secondary btn-icon" type="button" title="Очистить" @click="emit('update:modelValue', '')">
+    <div>
+      <input v-model="inputValue" placeholder="/uploads/image.webp или https://..." />
+      <button v-if="modelValue" type="button" title="Очистить" @click="emit('update:modelValue', '')">
         <X />
       </button>
     </div>

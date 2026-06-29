@@ -7,13 +7,8 @@ const isDark = computed(() => theme.value === "dark");
 </script>
 
 <template>
-  <button
-    class="btn btn-secondary btn-icon theme-toggle"
-    type="button"
-    :title="isDark ? 'Включить светлую тему' : 'Включить темную тему'"
-    :aria-label="isDark ? 'Включить светлую тему' : 'Включить темную тему'"
-    @click="toggleTheme"
-  >
+  <button type="button" :title="isDark ? 'Включить светлую тему' : 'Включить темную тему'"
+    :aria-label="isDark ? 'Включить светлую тему' : 'Включить темную тему'" @click="toggleTheme">
     <Moon v-if="!isDark" />
     <Sun v-else />
   </button>

@@ -111,65 +111,53 @@ defineExpose({ reset });
 </script>
 
 <template>
-  <section class="panel">
-    <div class="panel-header">
+  <section>
+    <div>
       <div>
-        <h2 class="panel-title">Массовая поставка</h2>
-        <p class="panel-description">Добавьте несколько товаров и примените приход одной операцией</p>
+        <h2>Массовая поставка</h2>
+        <p>Добавьте несколько товаров и примените приход одной операцией</p>
       </div>
-      <Truck style="color: var(--admin-primary)" />
+      <Truck />
     </div>
 
-    <form class="panel-body stack" @submit.prevent="submit">
-      <div class="bulk-delivery-grid">
-        <div v-for="(row, index) in rows" :key="row.key" class="bulk-delivery-row">
-          <div class="field">
+    <form @submit.prevent="submit">
+      <div>
+        <div v-for="(row, index) in rows" :key="row.key">
+          <div>
             <label :for="`bulk-product-${row.key}`">Товар</label>
-            <AdminSelect
-              :model-value="row.productId"
-              :options="optionsFor(row)"
-              placeholder="Выберите товар"
-              :aria-label="`Товар в строке поставки ${index + 1}`"
-              @update:model-value="row.productId = $event"
-            />
+            <AdminSelect :model-value="row.productId" :options="optionsFor(row)" placeholder="Выберите товар"
+              :aria-label="`Товар в строке поставки ${index + 1}`" @update:model-value="row.productId = $event" />
           </div>
 
-          <div class="field">
+          <div>
             <label :for="`bulk-quantity-${row.key}`">Количество</label>
-            <input
-              :id="`bulk-quantity-${row.key}`"
-              v-model.number="row.quantity"
-              class="input"
-              min="1"
-              step="1"
-              type="number"
-              placeholder="шт."
-            />
+            <input :id="`bulk-quantity-${row.key}`" v-model.number="row.quantity" min="1" step="1" type="number"
+              placeholder="шт." />
           </div>
 
-          <div class="bulk-delivery-current">
-            <span class="muted">Сейчас</span>
+          <div>
+            <span>Сейчас</span>
             <strong>{{ stockByProductId.get(row.productId)?.quantity ?? "—" }} шт.</strong>
           </div>
 
-          <button class="btn btn-danger btn-icon" type="button" title="Удалить строку" @click="removeRow(index)">
+          <button type="button" title="Удалить строку" @click="removeRow(index)">
             <Trash2 />
           </button>
         </div>
       </div>
 
-      <div class="toolbar">
-        <button class="btn btn-secondary" type="button" @click="addRow">
+      <div>
+        <button type="button" @click="addRow">
           <Plus />
           Добавить строку
         </button>
 
-        <div class="bulk-delivery-summary">
+        <div>
           <span>{{ rows.length }} строк</span>
           <span>{{ totalQuantity }} шт. в поставке</span>
         </div>
 
-        <button class="btn btn-primary" type="submit" :disabled="submitting">
+        <button type="submit" :disabled="submitting">
           <Truck />
           {{ submitting ? "Применяю..." : "Загрузить поставку" }}
         </button>

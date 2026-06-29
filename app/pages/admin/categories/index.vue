@@ -72,75 +72,68 @@ async function deleteCategory(category: CategoryItem) {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Catalog"
-      title="Категории"
-      description="Создание, редактирование и удаление товарных категорий"
-    />
+    <AdminHeader kicker="Catalog" title="Категории"
+      description="Создание, редактирование и удаление товарных категорий" />
 
-    <div class="admin-content stack-lg">
-      <section class="panel">
-        <div class="panel-header">
+    <div>
+      <section>
+        <div>
           <div>
-            <h2 class="panel-title">Новая категория</h2>
-            <p class="panel-description">Категорию можно также создать прямо из формы товара</p>
+            <h2>Новая категория</h2>
+            <p>Категорию можно также создать прямо из формы товара</p>
           </div>
-          <FolderPlus style="color: var(--admin-primary)" />
+          <FolderPlus />
         </div>
-        <form class="panel-body toolbar" @submit.prevent="createCategory">
-          <input v-model="newName" class="input" style="max-width: 520px" placeholder="Например, Смартфоны" />
-          <button class="btn btn-primary" type="submit" :disabled="saving">
+        <form @submit.prevent="createCategory">
+          <input v-model="newName" placeholder="Например, Смартфоны" />
+          <button type="submit" :disabled="saving">
             <FolderPlus />
             {{ saving ? "Создание..." : "Создать категорию" }}
           </button>
         </form>
       </section>
 
-      <section class="panel">
-        <div class="panel-header">
+      <section>
+        <div>
           <div>
-            <h2 class="panel-title">Все категории</h2>
-            <p class="panel-description">{{ categories.length }} записей</p>
+            <h2>Все категории</h2>
+            <p>{{ categories.length }} записей</p>
           </div>
         </div>
-        <div class="panel-body">
-          <div v-if="pending" class="empty-state">Загружаю категории...</div>
-          <div v-else-if="categories.length" class="table-wrap">
-            <table class="data-table">
+        <div>
+          <div v-if="pending">Загружаю категории...</div>
+          <div v-else-if="categories.length">
+            <table>
               <thead>
                 <tr>
                   <th>ID</th>
                   <th>Название</th>
-                  <th style="width: 190px">Действия</th>
+                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="category in categories" :key="category.id">
                   <td>{{ category.id }}</td>
                   <td>
-                    <input
-                      v-if="editingId === category.id"
-                      v-model="editingName"
-                      class="input compact"
-                      @keydown.enter.prevent="saveEdit(category.id)"
-                    />
+                    <input v-if="editingId === category.id" v-model="editingName"
+                      @keydown.enter.prevent="saveEdit(category.id)" />
                     <strong v-else>{{ category.name }}</strong>
                   </td>
                   <td>
-                    <div class="toolbar" style="justify-content: flex-start">
+                    <div>
                       <template v-if="editingId === category.id">
-                        <button class="btn btn-soft btn-icon" type="button" title="Сохранить" @click="saveEdit(category.id)">
+                        <button type="button" title="Сохранить" @click="saveEdit(category.id)">
                           <Check />
                         </button>
-                        <button class="btn btn-secondary btn-icon" type="button" title="Отмена" @click="editingId = null">
+                        <button type="button" title="Отмена" @click="editingId = null">
                           <X />
                         </button>
                       </template>
                       <template v-else>
-                        <button class="btn btn-secondary btn-icon" type="button" title="Редактировать" @click="startEdit(category)">
+                        <button type="button" title="Редактировать" @click="startEdit(category)">
                           <Pencil />
                         </button>
-                        <button class="btn btn-danger btn-icon" type="button" title="Удалить" @click="deleteCategory(category)">
+                        <button type="button" title="Удалить" @click="deleteCategory(category)">
                           <Trash2 />
                         </button>
                       </template>
@@ -150,7 +143,7 @@ async function deleteCategory(category: CategoryItem) {
               </tbody>
             </table>
           </div>
-          <div v-else class="empty-state">Категорий пока нет</div>
+          <div v-else>Категорий пока нет</div>
         </div>
       </section>
     </div>

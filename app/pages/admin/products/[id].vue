@@ -62,61 +62,58 @@ async function addPrice() {
 
 <template>
   <div>
-    <AdminHeader
-      kicker="Catalog"
-      :title="product?.name || 'Редактирование товара'"
-      :description="product ? `Артикул ${product.article}` : 'Загрузка карточки товара'"
-    >
+    <AdminHeader kicker="Catalog" :title="product?.name || 'Редактирование товара'"
+      :description="product ? `Артикул ${product.article}` : 'Загрузка карточки товара'">
       <template #actions>
-        <NuxtLink class="btn btn-secondary" to="/admin/products">К списку</NuxtLink>
+        <NuxtLink to="/admin/products">К списку</NuxtLink>
       </template>
     </AdminHeader>
 
-    <div class="admin-content stack-lg">
-      <div v-if="productPending" class="empty-state">Загружаю товар...</div>
+    <div>
+      <div v-if="productPending">Загружаю товар...</div>
 
       <template v-else-if="product">
-        <section class="panel">
-          <div class="panel-header">
+        <section>
+          <div>
             <div>
-              <h2 class="panel-title">Управление ценой</h2>
-              <p class="panel-description">Новая цена автоматически станет текущей и попадет в историю</p>
+              <h2>Управление ценой</h2>
+              <p>Новая цена автоматически станет текущей и попадет в историю</p>
             </div>
-            <Banknote style="color: var(--admin-primary)" />
+            <Banknote />
           </div>
-          <div class="panel-body stack">
-            <div class="mini-stat-grid">
-              <div class="mini-stat">
-                <p class="mini-stat-label">Текущая цена</p>
-                <p class="mini-stat-value">{{ formatPrice(product.currentPrice) }}</p>
+          <div>
+            <div>
+              <div>
+                <p>Текущая цена</p>
+                <p>{{ formatPrice(product.currentPrice) }}</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Предыдущая цена</p>
-                <p class="mini-stat-value">{{ product.oldPrice ? formatPrice(product.oldPrice) : "—" }}</p>
+              <div>
+                <p>Предыдущая цена</p>
+                <p>{{ product.oldPrice ? formatPrice(product.oldPrice) : "—" }}</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Остаток</p>
-                <p class="mini-stat-value">{{ product.productStocks[0]?.quantity ?? 0 }} шт.</p>
+              <div>
+                <p>Остаток</p>
+                <p>{{ product.productStocks[0]?.quantity ?? 0 }} шт.</p>
               </div>
-              <div class="mini-stat">
-                <p class="mini-stat-label">Обновлен</p>
-                <p class="mini-stat-value" style="font-size: 15px">{{ formatDate(product.updatedAt) }}</p>
+              <div>
+                <p>Обновлен</p>
+                <p>{{ formatDate(product.updatedAt) }}</p>
               </div>
             </div>
 
-            <form class="toolbar" @submit.prevent="addPrice">
-              <div class="field" style="width: min(360px, 100%)">
+            <form @submit.prevent="addPrice">
+              <div>
                 <label for="new-price">Новая цена</label>
-                <input id="new-price" v-model.number="newPrice" class="input" min="0" step="0.01" type="number" placeholder="99000" />
+                <input id="new-price" v-model.number="newPrice" min="0" step="0.01" type="number" placeholder="99000" />
               </div>
-              <button class="btn btn-primary" type="submit" :disabled="addingPrice">
+              <button type="submit" :disabled="addingPrice">
                 <Plus />
                 {{ addingPrice ? "Добавление..." : "Добавить цену" }}
               </button>
             </form>
 
-            <div v-if="product.productPrices?.length" class="table-wrap">
-              <table class="data-table">
+            <div v-if="product.productPrices?.length">
+              <table>
                 <thead>
                   <tr>
                     <th>Цена</th>
@@ -127,7 +124,7 @@ async function addPrice() {
                   <tr v-for="price in product.productPrices" :key="price.id">
                     <td><strong>{{ formatPrice(price.value) }}</strong></td>
                     <td>
-                      <Clock3 style="display: inline; width: 15px; height: 15px; margin-right: 6px; vertical-align: -2px; color: var(--admin-muted)" />
+                      <Clock3 />
                       {{ formatDate(price.createdAt) }}
                     </td>
                   </tr>
@@ -137,16 +134,11 @@ async function addPrice() {
           </div>
         </section>
 
-        <AdminProductForm
-          :attributes="attributes"
-          :categories="categories"
-          :initial="product"
-          :loading="saving"
-          @submit="submit"
-        />
+        <AdminProductForm :attributes="attributes" :categories="categories" :initial="product" :loading="saving"
+          @submit="submit" />
       </template>
 
-      <div v-else class="empty-state">Товар не найден</div>
+      <div v-else>Товар не найден</div>
     </div>
   </div>
 </template>
