@@ -222,9 +222,15 @@ export default defineEventHandler(async (event) => {
   const recentOrders = await prisma.order.findMany({
     take: 5,
     orderBy: { createdAt: "desc" },
-    include: {
-      payment: { select: { amount: true, paymentStatus: true } },
-      user: { select: { name: true, email: true } },
+    select: {
+      id: true,
+      orderStatus: true,
+      paymentMethod: true,
+      obtainingMethod: true,
+      createdAt: true,
+      updatedAt: true,
+      payment: { select: { amount: true, paymentStatus: true, paidAt: true } },
+      user: { select: { id: true, name: true, email: true } },
       _count: { select: { orderItems: true } }
     }
   });

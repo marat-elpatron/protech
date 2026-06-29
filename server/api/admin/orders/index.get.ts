@@ -18,12 +18,29 @@ export default defineEventHandler(async (event) => {
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        id: true,
+        orderStatus: true,
+        paymentMethod: true,
+        obtainingMethod: true,
+        createdAt: true,
+        updatedAt: true,
         user: { select: { id: true, name: true, email: true } },
-        payment: true,
-        delivery: true,
+        payment: { select: { amount: true, paymentStatus: true, paidAt: true } },
+        delivery: {
+          select: {
+            address: true,
+            apartment: true,
+            entrance: true,
+            floor: true,
+            intercom: true,
+            comment: true,
+          },
+        },
         orderItems: {
-          include: {
+          select: {
+            quantity: true,
+            price: true,
             product: { select: { id: true, name: true, mainImage: true } }
           }
         }

@@ -204,6 +204,11 @@ export type OrderItem = {
   _count?: { orderItems: number };
 };
 
+export type DashboardRecentOrder = Pick<
+  OrderItem,
+  "id" | "orderStatus" | "paymentMethod" | "obtainingMethod" | "createdAt" | "updatedAt" | "payment" | "user" | "_count"
+>;
+
 export type ReviewAnswer = {
   id: number;
   text: string;
@@ -254,7 +259,7 @@ export type DashboardStats = {
     lowStock: number;
     revenuePaid: number | string;
   };
-  recentOrders: OrderItem[];
+  recentOrders: DashboardRecentOrder[];
   analytics: {
     period: { startDate: string; endDate: string; days: number };
     selectedProductId: number | null;

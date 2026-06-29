@@ -42,7 +42,7 @@ const dashboardQuery = computed(() => ({
   endDate: period.value === "custom" ? customEnd.value : undefined,
 }));
 
-const { data, pending } = await useAsyncData(
+const { data, pending, error, refresh } = await useAsyncData(
   "admin-dashboard",
   () => api.getDashboard(dashboardQuery.value),
   { watch: [dashboardQuery] },
@@ -115,6 +115,14 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
 
     <div class="admin-content stack-lg">
       <div v-if="pending" class="empty-state">Загружаю аналитику...</div>
+      <div v-else-if="error" class="empty-state">
+        <div class="empty-state-content">
+          <AlertTriangle style="width: 32px; height: 32px; color: var(--admin-red)" />
+          <strong>Не удалось загрузить дашборд</strong>
+          <span>Проверьте подключение к базе данных или повторите запрос.</span>
+          <button class="btn btn-secondary" type="button" @click="refresh()">Повторить</button>
+        </div>
+      </div>
 
       <template v-else-if="data">
         <section class="metrics-grid">
@@ -262,7 +270,27 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
             <PackageSearch style="color: var(--admin-lime)" />
           </div>
           <div class="panel-body">
-            <div v-if="data.analytics.productSales.length" class="table-wrap">
+            <div v-if="data.analytics.productSales.length" class="mobile-card-list">
+              <article
+                v-for="(product, index) in data.analytics.productSales"
+                :key="product.productId"
+                class="mobile-data-card"
+              >
+                <div class="entity-cell">
+                  <img class="thumb" :src="product.mainImage" :alt="product.name" />
+                  <div>
+                    <p class="entity-title">{{ index + 1 }}. {{ product.name }}</p>
+                    <p class="entity-meta">{{ product.article }}</p>
+                  </div>
+                </div>
+                <div class="mobile-data-grid">
+                  <span>Продано <strong>{{ product.quantity }} шт.</strong></span>
+                  <span>Заказы <strong>{{ product.orders }}</strong></span>
+                  <span>Выручка <strong>{{ formatPrice(product.revenue) }}</strong></span>
+                </div>
+              </article>
+            </div>
+            <div v-if="data.analytics.productSales.length" class="table-wrap desktop-table">
               <table class="data-table">
                 <thead>
                   <tr>
@@ -322,7 +350,20 @@ const revenuePolyline = computed(() => revenuePoints.value.map((point) => `${poi
             </div>
           </div>
           <div class="panel-body">
-            <div v-if="data.recentOrders.length" class="table-wrap">
+            <div v-if="data.recentOrders.length" class="mobile-card-list">
+              <article v-for="order in data.recentOrders" :key="order.id" class="mobile-data-card">
+                <div class="mobile-card-header">
+                  <strong>Заказ #{{ order.id }}</strong>
+                  <AdminStatusBadge :status="order.orderStatus" type="order" />
+                </div>
+                <p class="entity-meta">{{ order.user?.name || order.user?.email || "Гость" }}</p>
+                <div class="mobile-data-grid">
+                  <span>Сумма <strong>{{ order.payment ? formatPrice(order.payment.amount) : "—" }}</strong></span>
+                  <span>Дата <strong>{{ formatDate(order.createdAt) }}</strong></span>
+                </div>
+              </article>
+            </div>
+            <div v-if="data.recentOrders.length" class="table-wrap desktop-table">
               <table class="data-table">
                 <thead>
                   <tr>
