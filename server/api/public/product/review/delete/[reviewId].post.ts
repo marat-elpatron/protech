@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = session.user;
-  const reviewId = Number(getRouterParam(event, "reviewId"));
+  const reviewId = getPositiveIntRouterParam(event, "reviewId", "Некорректный ID отзыва");
 
   try {
     const review = await prisma.review.findUnique({

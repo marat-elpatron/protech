@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const productId = Number(getRouterParam(event, "productId"));
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   const product = await prisma.product.findUnique({
     where: { id: productId },

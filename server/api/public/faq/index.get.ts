@@ -1,7 +1,6 @@
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);
-  const page = Number(query.page ?? 1);
-  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
+  const currentPage = getPageQueryParam(query.page);
   const limit = 20;
 
   const questions = await prisma.shopQuestion.findMany({

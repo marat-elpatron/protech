@@ -3,7 +3,7 @@ import { reviewAnswerSchema } from "~~/shared/schemas/admin/reviews/reviewAnswer
 export default defineEventHandler(async (event) => {
   const { userId } = await requireAdmin(event);
 
-  const reviewId = Number(getRouterParam(event, "reviewId"));
+  const reviewId = getPositiveIntRouterParam(event, "reviewId", "Некорректный ID отзыва");
 
   const result = await readValidatedBody(event, (body) => reviewAnswerSchema.safeParse(body));
 

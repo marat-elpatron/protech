@@ -44,8 +44,7 @@ function parseAttributes(attributes?: string): AttributeFilter[] {
 export default defineEventHandler(async (event) => {
   const query = getQuery<ProductQuery>(event);
 
-  const page = Number(query.page ?? 1);
-  const currentPage = Number.isFinite(page) && page > 0 ? page : 1;
+  const currentPage = getPageQueryParam(query.page);
 
   const search = query.search?.trim();
 
@@ -55,7 +54,7 @@ export default defineEventHandler(async (event) => {
 
   const minPrice = Number.isFinite(parsedMinPrice) ? parsedMinPrice : undefined;
   const maxPrice = Number.isFinite(parsedMaxPrice) ? parsedMaxPrice : undefined;
-  const categoryId = Number.isFinite(parsedCategoryId) ? parsedCategoryId : undefined;
+  const categoryId = Number.isInteger(parsedCategoryId) && parsedCategoryId > 0 ? parsedCategoryId : undefined;
   const sort = query.sort;
 
   const limit = 20;

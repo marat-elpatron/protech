@@ -4,14 +4,7 @@ import { updateProductSchema } from "~~/shared/schemas/admin/products/updateProd
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const productId = Number(getRouterParam(event, "productId"));
-
-  if (!Number.isInteger(productId) || productId <= 0) {
-    throw createError({
-      statusCode: 400,
-      message: "Некорректный ID товара",
-    });
-  }
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   const result = await readValidatedBody(event, (body) => updateProductSchema.safeParse(body));
 

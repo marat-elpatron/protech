@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   const sortBy = (["quantity", "revenue", "orders"].includes(String(query.sortBy))
     ? String(query.sortBy)
     : "quantity") as SortBy;
-  const selectedProductId = query.productId ? Number(query.productId) : null;
+  const selectedProductId = getOptionalPositiveIntQueryParam(query.productId) ?? null;
   const endDateParam = parseDate(query.endDate);
   const startDateParam = parseDate(query.startDate);
   const defaultEndDate = endOfDay(new Date());

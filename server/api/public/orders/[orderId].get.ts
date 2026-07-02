@@ -28,14 +28,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const orderId = Number(getRouterParam(event, "orderId"));
-
-  if (!Number.isInteger(orderId) || orderId <= 0) {
-    throw createError({
-      statusCode: 400,
-      message: "Некорректный ID заказа"
-    });
-  }
+  const orderId = getPositiveIntRouterParam(event, "orderId", "Некорректный ID заказа");
 
   const order = await prisma.order.findFirst({
     where: {

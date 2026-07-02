@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
   const query = getQuery(event);
-  const page = Math.max(1, Number(query.page ?? 1));
+  const page = getPageQueryParam(query.page);
   const pending = query.pending === "true";
   const limit = 20;
 

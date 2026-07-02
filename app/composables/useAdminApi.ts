@@ -14,12 +14,14 @@ function compactQuery(query?: FetchOptions["query"]) {
 
 export function useAdminApi() {
   async function request<T>(url: string, options: FetchOptions = {}): Promise<T> {
-    return await $fetch<T>(url, {
+    const response = await $fetch(url, {
       method: options.method ?? "GET",
       body: options.body,
       query: compactQuery(options.query),
       credentials: "include",
     });
+
+    return response as T;
   }
 
   return {

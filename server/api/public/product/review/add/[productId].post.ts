@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = session.user;
-  const productId = Number(getRouterParam(event, "productId"));
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   const result = await readValidatedBody(event, (body) => createReviewSchema.safeParse(body));
 
@@ -55,6 +55,20 @@ export default defineEventHandler(async (event) => {
 
     return { success: true };
   } catch (error: any) {
+    if (error.code === "P2002") {
+      throw createError({
+        statusCode: 409,
+        message: "Вы уже оставили отзыв на этот товар"
+      })
+    }
+
+    if (error.code === "P2003") {
+      throw createError({
+        statusCode: 404,
+        message: "Товар не найден"
+      })
+    }
+
     throw createError({
       statusCode: 500,
       message: "Ошибка сервера при оставлении отзыва"

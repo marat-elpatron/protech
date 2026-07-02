@@ -4,7 +4,7 @@ import { addProductPriceSchema } from "~~/shared/schemas/admin/products/addProdu
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const productId = Number(getRouterParam(event, "productId"));
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   const result = await readValidatedBody(event, (body) => addProductPriceSchema.safeParse(body));
 

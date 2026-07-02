@@ -1,7 +1,11 @@
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const attributeId = Number(getRouterParam(event, "attributeId"));
+  const attributeId = getPositiveIntRouterParam(
+    event,
+    "attributeId",
+    "Некорректный ID характеристики"
+  );
 
   try {
     await prisma.attribute.delete({

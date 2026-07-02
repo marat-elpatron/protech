@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const productId = Number(getRouterParam(event, "productId"));
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   try {
     const product = await prisma.product.findUnique({
@@ -109,6 +109,10 @@ export default defineEventHandler(async (event) => {
 
     return product;
   } catch (error: any) {
+    if (error.statusCode) {
+      throw error;
+    }
+
     throw createError({
       statusCode: 500,
       message: "Ошибка сервера при получении деталей товара",

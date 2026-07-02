@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 	}
 
 	const user = session.user;
-	const productId = Number(getRouterParam(event, "productId"));
+	const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
 	try {
 		await prisma.productSubscription.delete({

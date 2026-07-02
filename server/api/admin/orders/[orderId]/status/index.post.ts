@@ -5,7 +5,7 @@ import { updateOrderStatusSchema } from "~~/shared/schemas/admin/orders/updateOr
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const orderId = Number(getRouterParam(event, "orderId"));
+  const orderId = getPositiveIntRouterParam(event, "orderId", "Некорректный ID заказа");
 
   const result = await readValidatedBody(event, (body) => updateOrderStatusSchema.safeParse(body));
 

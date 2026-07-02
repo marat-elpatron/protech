@@ -3,7 +3,11 @@ import { updateAttributeSchema } from "~~/shared/schemas/admin/products/updateAt
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
-  const attributeId = Number(getRouterParam(event, "attributeId"));
+  const attributeId = getPositiveIntRouterParam(
+    event,
+    "attributeId",
+    "Некорректный ID характеристики"
+  );
 
   const result = await readValidatedBody(event, (body) => updateAttributeSchema.safeParse(body));
 

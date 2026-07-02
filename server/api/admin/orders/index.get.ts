@@ -1,12 +1,21 @@
-import { Prisma } from "@prisma/client";
+import { OrderStatus, Prisma } from "@prisma/client";
+
+const orderStatuses = new Set<string>(Object.values(OrderStatus));
 
 export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
   const query = getQuery(event);
-  const page = Math.max(1, Number(query.page ?? 1));
+  const page = getPageQueryParam(query.page);
   const status = query.status ? String(query.status) : undefined;
   const limit = 20;
+
+  if (status && !orderStatuses.has(status)) {
+    throw createError({
+      statusCode: 400,
+      message: "Некорректный статус заказа"
+    });
+  }
 
   const where: Prisma.OrderWhereInput = status
     ? { orderStatus: status as Prisma.EnumOrderStatusFilter["equals"] }

@@ -14,7 +14,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = session.user;
-  const shopQuestionId = Number(getRouterParam(event, "shopQuestionId"));
+  const shopQuestionId = getPositiveIntRouterParam(
+    event,
+    "shopQuestionId",
+    "Некорректный ID вопроса"
+  );
 
   const result = await readValidatedBody(event, (body) => updateShopQuestionSchema.safeParse(body));
 

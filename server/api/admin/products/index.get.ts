@@ -4,9 +4,9 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event);
 
   const query = getQuery(event);
-  const page = Math.max(1, Number(query.page ?? 1));
+  const page = getPageQueryParam(query.page);
   const search = String(query.search ?? "").trim();
-  const categoryId = query.categoryId ? Number(query.categoryId) : undefined;
+  const categoryId = getOptionalPositiveIntQueryParam(query.categoryId);
   const isActive = query.isActive === "true" ? true : query.isActive === "false" ? false : undefined;
   const limit = 20;
 

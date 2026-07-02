@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = session.user;
-  const productId = Number(getRouterParam(event, "productId"));
+  const productId = getPositiveIntRouterParam(event, "productId", "Некорректный ID товара");
 
   try {
     const result = await prisma.$transaction(async (tx) => {
@@ -60,6 +60,13 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     if (error.statusCode) {
       throw error;
+    }
+
+    if (error.code === "P2003") {
+      throw createError({
+        statusCode: 404,
+        message: "Товар не найден"
+      });
     }
 
     throw createError({

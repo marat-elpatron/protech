@@ -11,7 +11,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const user = session.user;
-  const shopQuestionId = Number(getRouterParam(event, "shopQuestionId"));
+  const shopQuestionId = getPositiveIntRouterParam(
+    event,
+    "shopQuestionId",
+    "Некорректный ID вопроса"
+  );
 
   const question = await prisma.shopQuestion.findUnique({
     where: { id: shopQuestionId },
